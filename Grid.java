@@ -11,7 +11,7 @@ public class Grid {
 		this.spreadsheet = spreadsheet;
 	}
 
-	public void print() {
+	public void print(Cell[][] cellSheet) {
 		String[] alphabet = new String[] { "A", "B", "C", "D", "E", "F", "G" };
 		printFourSpaces();
 		System.out.print("|");
@@ -30,24 +30,40 @@ public class Grid {
 		
 		
 		//draws the rows and numbers them.
-		for (int x = 0; x < this.spreadsheet.length; x++) {
+		for (int y = 0; y < 10; y++) {
 
-			if (x > 8) {
-				System.out.print(" " + (x + 1) + " ");
+			if (y > 8) {
+				System.out.print(" " + (y + 1) + " ");
 			}
-
+			//We now print out the rows on the relation of the 
+			//size of the index.
 			else {
-				System.out.print("  " + (x + 1) + " ");
+				System.out.print("  " + (y + 1) + " ");
 			}
 
 			System.out.print("|");
 
-			for (int y = 0; y < this.spreadsheet[x].length; y++) {
-				String content = spreadsheet[x][y].toString();
-
+			for (int x = 0; x < 7; x++) {
+				String content;
+				//Will check to see if is formula to then
+				//evaluate it using the formula cell evaluate
+				//method.
+				if(spreadsheet[y][x] instanceof FormulaCell){
+					content = ((FormulaCell)spreadsheet[y][x]).getValue(cellSheet);
+				}
+					else{
+						content = spreadsheet[y][x].toString();
+					}
 				if (content.length() > 9) {
-					content = content.substring(0, 10);
-				}else if (content.length() == 0) {
+					//When the value is larger than the max size
+					//we will shrink it and display a smaller version.
+					content = content.substring(0, 9);
+					printSpaces(content);
+					System.out.print(content);
+					printSpaces(content);
+					System.out.print("|");
+				}
+				else if (content.length() == 0) {
 					printSpaces(content);
 					System.out.print(content);
 					printSpaces(content);

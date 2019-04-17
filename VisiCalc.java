@@ -29,7 +29,7 @@ public class VisiCalc {
 
 		// Creates grid and populates it with the already set cellsheet.
 		Grid spreadsheet = new Grid(cellsheet);
-		spreadsheet.print();
+		spreadsheet.print(cellsheet);
 
 		//
 		boolean quit = false;
@@ -65,7 +65,7 @@ public class VisiCalc {
 		else if (command.equalsIgnoreCase("PRINT")) {
 			Grid spreadsheet = new Grid(cellSheet);
 			cmd = saveCommand(command, cmd);
-			spreadsheet.print();
+			spreadsheet.print(cellSheet);
 		}
 		// Load Function code
 		else if (command.equalsIgnoreCase("LOAD")) {
@@ -130,7 +130,7 @@ public class VisiCalc {
 	}
 
 	private static int findY(String command) {
-		return Integer.parseInt(command.substring(1, 2)) - 1;
+		return Integer.parseInt(command.substring(1)) - 1;
 	}
 
 	private static int findX(String command) {
