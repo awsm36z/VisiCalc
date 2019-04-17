@@ -9,6 +9,11 @@ VisiCalc Project
 import java.util.*;
 
 public class FormulaCell extends Cell implements Comparable<FormulaCell> {
+    /**
+     *
+     */
+
+    private static final double INVALID_VALUE = Double.MAX_VALUE;
     String formula;
     int row;
     int column;
@@ -17,7 +22,9 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
         super(row, column);
         this.formula = formula;
     }
-    //---------- to String method, returns the value long enough for the Grid.-----------
+
+    // ---------- to String method, returns the value long enough for the
+    // Grid.-----------
     public String toString() {
         // For the grid toString we will only display the formula.
         if (this.formula.length() > 9) {
@@ -25,16 +32,19 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
         }
         return this.formula;
     }
-    //-----------------Get Value Method, returns literal value of the cell.--------------
-     public String getValue() {
-         return this.formula;
+
+    // -----------------Get Value Method, returns literal value of the
+    // cell.--------------
+    public String getValue() {
+        return this.formula;
     }
 
-    public String toString(Cell[][] cellSheet, String s) {
-        if (this.formula.length() > 9) {
-            return this.formula.substring(0, 10);
+    public String getValue(Cell[][] cellSheet) {
+        double answer = solve(cellSheet);
+        if (INVALID_VALUE == answer) {
+            return ("NaN");
         }
-        return this.formula;
+        return answer + "";
     }
 
     public int compareTo(FormulaCell other) {
@@ -52,156 +62,99 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
         Scanner equationScanner = new Scanner(this.formula);
         double answer = 0.0;
 
-        // We will create variable "operator" to hold what operation we are running 
-        // and use it to find the first and second tokens
-        // -- instead of just re-writing the code but changing the operator
-        // for the indexOf portion, we will just have it look for the operator
-        // which will be stored as a String.
-        String operator = "";
         ArrayList<String> newFormula = new ArrayList<String>();
 
-        //populate arraylist with the different tokens to calculate
+        // populate arraylist with the different tokens to calculate
         while (equationScanner.hasNext()) {
             newFormula.add(equationScanner.next());
         }
 
-        // if the formula has Multiplication or
-        // Division, then evaluate those first.
+        if (newFormula.size() == 1) {
+            return resolveToNumber(newFormula.get(0), cellSheet);
+        }
 
-        // We check to see division first, but
-        // in case there is multiplication...
+        int operatorIndex = -1;
 
-        if (hasDivision(newFormula)) {
+        // calculate all higher order operations (/ or *) first
+        while (((operatorIndex = getFirstMultiplicationOrDivisionIndex(newFormula)) != -1) && answer != INVALID_VALUE) {
+            answer = evaluatAndSimplify(cellSheet, operatorIndex, newFormula);
+        }
 
-            // We will also check for that.
-            // Then we will go on to check to see
-            if (hasMultiplication(newFormula)) {
-
-                // if the formula evaluates division before multiplication,
-                // then go to the division place and evaluate it.
-                if (hasDivisionFirst(newFormula)) {
-                    answer = divide(cellSheet, newFormula);
-                } else {
-                    answer = multiply(cellSheet, newFormula);
-                }
-            } else {
-                answer = divide(cellSheet, newFormula);
-            }
-        }   else if(hasAddition(newFormula)){
-
-                    if (hasSubtraction(newFormula)){
-
-                        if(hasSubtractionFirst(newFormula)){
-                            answer = subtract(cellSheet, newFormula);
-                        }
-
-                        else{
-                            answer = add(cellSheet, newFormula);
-                        }
-
-
-                    }
-                    else{
-                        answer = add(cellSheet, newFormula);
-                    }
-                }
-
-                else if(hasSubtraction(newFormula)){
-                    answer = subtract(cellSheet, newFormula);
-                }
-
-                else if(hasMultiplication(newFormula)){
-                    answer = subtract(cellSheet, newFormula);
-                }
-
-
+        // calculate lower order operations (+ or -) next
+        while (((operatorIndex = getFirstAdditionOrSubtractionIndex(newFormula)) != -1) && answer != INVALID_VALUE) {
+            answer = evaluatAndSimplify(cellSheet, operatorIndex, newFormula);
+        }
         return answer;
     }
 
-    private double multiply(Cell[][] cellSheet, ArrayList<String> newFormula) {
-        double answer;
-        String operator;
-        operator = "*";
-        answer = EvaluateDivision(cellSheet, operator, newFormula);
-        return answer;
+    private int getFirstMultiplicationOrDivisionIndex(ArrayList<String> newFormula) {
+        if (newFormula.indexOf("/") == -1) {
+            return newFormula.indexOf("*");
+        } else if (newFormula.indexOf("*") == -1) {
+            return newFormula.indexOf("/");
+        }
+
+        return Math.min(newFormula.indexOf("/"), newFormula.indexOf("*"));
     }
 
-    private double subtract(Cell[][] cellSheet, ArrayList<String> newFormula) {
-        double answer;
-        String operator;
-        operator = "-";
-        answer = EvaluateDivision(cellSheet, operator, newFormula);
-        return answer;
+    private int getFirstAdditionOrSubtractionIndex(ArrayList<String> newFormula) {
+        if (newFormula.indexOf("-") == -1) {
+            return newFormula.indexOf("+");
+        } else if (newFormula.indexOf("+") == -1) {
+            return newFormula.indexOf("-");
+        }
+
+        return Math.min(newFormula.indexOf("+"), newFormula.indexOf("-"));
     }
 
-    private double add(Cell[][] cellSheet, ArrayList<String> newFormula) {
-        double answer;
-        String operator;
-        operator = "+";
-        answer = EvaluateDivision(cellSheet, operator, newFormula);
-        return answer;
-    }
-
-    private double divide(Cell[][] cellSheet, ArrayList<String> newFormula) {
-        double answer;
-        String operator;
-        operator = "/";
-        answer = EvaluateDivision(cellSheet, operator, newFormula);
-        return answer;
-    }
-
-    private boolean hasMultiplication(ArrayList<String> newFormula) {
-        return newFormula.contains("*");
-    }
-
-    private boolean hasDivision(ArrayList<String> newFormula) {
-        return newFormula.contains("/");
-    }
-
-    private boolean hasAddition(ArrayList<String> newFormula) {
-        return newFormula.contains("+");
-    }
-
-    private boolean hasSubtraction(ArrayList<String> newFormula) {
-        return newFormula.contains("-");
-    }
-
-    private double EvaluateDivision(Cell[][] cellSheet, String operator, ArrayList<String> newFormula) {
+    private double evaluatAndSimplify(Cell[][] cellSheet, int operatorIndex, ArrayList<String> newFormula) {
 
         // Now we will check to see if the tokens before and after
         // are numbers or a Cellsheet location.
-        String firstToken = newFormula.get(getFirstTokenLocation(operator, newFormula));
-        String secondToken = newFormula.get(newFormula.indexOf(operator) + 1);
+        String firstToken = newFormula.get(operatorIndex - 1);
+        String secondToken = newFormula.get(operatorIndex + 1);
 
         // Create a first and second term to be able to add them
         double firstTerm = resolveToNumber(firstToken, cellSheet);
         double secondTerm = resolveToNumber(secondToken, cellSheet);
 
+        if (firstTerm == INVALID_VALUE || secondTerm == INVALID_VALUE) {
+            return INVALID_VALUE;
+        }
+
+        String operator = newFormula.get(operatorIndex);
+
         // -----------Now we return the evaluated expression--------
-        double answer = 0.0;
-        //Division
-        if(operator.equals("/")){
-            answer = firstTerm / secondTerm;
-        }
-        //Multiplication
-        else if(operator.equals("*")){
-            answer = firstTerm * secondTerm;
-        }
-        //Addition
-        else if(operator.equals("+")){
-            answer = firstTerm + secondTerm;
-        }
-        //Subtraction
-        else {
-            answer = firstTerm - secondTerm;
-        }
-        newFormula.set(newFormula.indexOf(operator), answer+"");
-        newFormula.remove(getFirstTokenLocation(operator, newFormula));
+        double answer = calculate(operator, firstTerm, secondTerm);
+
+        newFormula.set(newFormula.indexOf(operator), answer + "");
+        // We trim down the array starting from the right
+        // so that the left indicies remain valid.
+        newFormula.remove(operatorIndex + 1);
+        newFormula.remove(operatorIndex - 1);
+
         return answer;
     }
 
-    private int getFirstTokenLocation(String operator, ArrayList<String> newFormula) {
-        return newFormula.indexOf(operator) - 1;
+    private double calculate(String operator, double firstTerm, double secondTerm) {
+        double answer = 0.0;
+        // Division
+        if (operator.equals("/")) {
+            answer = firstTerm / secondTerm;
+        }
+        // Multiplication
+        else if (operator.equals("*")) {
+            answer = firstTerm * secondTerm;
+        }
+        // Addition
+        else if (operator.equals("+")) {
+            answer = firstTerm + secondTerm;
+        }
+        // Subtraction
+        else {
+            answer = firstTerm - secondTerm;
+        }
+        return answer;
     }
 
     private int getXPosition(String firstToken) {
@@ -221,20 +174,27 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
     }
 
     /*
-    Method will recieve a string that was pre-checked
-    to be a position for a cell. The method will then 
-    return the cell value. But if the cell is not a number 
-    cell, it will exit out of the method and tell the user that the input
-    is invalid.
-    */
+     * Method will recieve a string that was pre-checked to be a position for a
+     * cell. The method will then return the cell value. But if the cell is not a
+     * number cell, it will exit out of the method and tell the user that the input
+     * is invalid.
+     */
     public double resolveToNumber(String token, Cell[][] cellSheet) {
         if ("ABCDEFG".contains(token.substring(0, 1))) {
             int xPos = getXPosition(token);
             int yPos = getYPosition(token);
-            if(cellSheet[yPos][xPos] instanceof NumberCell){
-                return Double.parseDouble(cellSheet[yPos][xPos].getValue()); 
+            if (cellSheet[yPos][xPos] instanceof FormulaCell) {
+                return Double.parseDouble(((FormulaCell) cellSheet[yPos][xPos]).getValue(cellSheet));
+            } else if (cellSheet[yPos][xPos] instanceof NumberCell) {
+                return cellSheet[yPos][xPos].toDouble();
             }
-            return Double.MIN_VALUE;
+            
+            String value = cellSheet[yPos][xPos].getValue();
+            if(value.length() > 0){
+                return Double.parseDouble(value);
+            }
+            return 0;
+
         } else {
             return Double.parseDouble(token);
         }

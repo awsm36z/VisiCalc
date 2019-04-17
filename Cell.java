@@ -18,5 +18,7 @@ public class Cell {
 	public String getValue() {
 		return value;
 	}
-	
+	public double toDouble(){
+		return Double.parseDouble(value);
+	}
 }

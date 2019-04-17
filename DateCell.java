@@ -45,7 +45,7 @@ public class DateCell extends Cell {
 		return this.month + "/"+ this.day + "/" + this.year;
 	}
 	
-	public String toString(String str) {
+	public String getValue() {
 		return this.month + "/"+ this.day + "/" + this.year;
 	}
 }

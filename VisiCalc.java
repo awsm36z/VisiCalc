@@ -104,7 +104,14 @@ public class VisiCalc {
 			 * Command to just call and find a cell
 			 */
 			else {
-				System.out.println(cellSheet[y][x].getValue());
+				//Command will evaluate the formula everytime you call it.
+				if(cellSheet[y][x] instanceof FormulaCell){
+					System.out.println(((FormulaCell)cellSheet[y][x]).getValue(cellSheet));
+				}
+				//otherwise, just print the literal value.
+				else{
+					System.out.println(cellSheet[y][x].getValue());
+				}
 			}
 		}
 

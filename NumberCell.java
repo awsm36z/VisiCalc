@@ -12,11 +12,15 @@ public class NumberCell extends Cell implements Comparable<NumberCell> {
 		
 	}
 	
-	public String toString() {
+	public String getValue() {
 		return this.number + "";
 	} 
+
+	public double toDouble(){
+		return number;
+	}
 	
-	public String getValue() {
+	public String toString() {
 		String strNum = this.number + "";
 		if (strNum.length()==2){
 			return strNum + "  ";
