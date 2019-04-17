@@ -27,8 +27,14 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
     // Grid.-----------
     public String toString() {
         // For the grid toString we will only display the formula.
-        if (this.formula.length() > 9) {
+        if (this.formula.length() > 8) {
             return this.formula.substring(0, 9);
+        }
+        if (this.formula.length() == 5){
+            return this.formula + "  ";
+        }
+        if(this.formula.length() == 8){
+            return this.formula + "   ";
         }
         return this.formula + " ";
     }

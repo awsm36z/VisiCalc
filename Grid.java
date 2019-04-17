@@ -67,6 +67,7 @@ public class Grid {
 			drawBorder();
 
 		}
+		System.out.println("\n \n");
 
 	}
 
