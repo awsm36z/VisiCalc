@@ -30,7 +30,7 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
         if (this.formula.length() > 9) {
             return this.formula.substring(0, 9);
         }
-        return this.formula ;
+        return this.formula + " ";
     }
 
     // -----------------Get Value Method, returns literal value of the
