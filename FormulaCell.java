@@ -78,16 +78,75 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
         if (newFormula.size() == 1) {
             return resolveToNumber(newFormula.get(0), cellSheet);
         }
-
-        if (newFormula.get(0).equals("Sum")){
-            //double sum = 0.0;
+        
+        //if the input is looking for the 
+        //sum of a range of values.
+        if (isSum(newFormula)) {
+            // double sum = 0.0;
             String rangeStart = newFormula.get(2);
             String rangeEnd = newFormula.get(4);
             int xStart = getXPosition(rangeStart);
-            int yStart = getYPosition(rangeEnd);
+            int yStart = getYPosition(rangeStart);
 
-            System.out.println(xStart +" , "+ yStart);
+            int xEnd = getXPosition(rangeEnd);
+            int yEnd = getYPosition(rangeEnd);
+            
+            /*if in the same column(same x)
+            ________
+            |______|
+            |______|
+            |______|
+            |______|*/
+            if (isColumn(xStart, xEnd)){
 
+            } 
+
+            /*if it is all in one row (same y)
+            ___________________________________
+            |_______|________|________|_______|
+
+            */
+            else if(isRow(yStart, yEnd)){
+
+            }
+
+            else /*if it is a rectangle*/ {
+
+            }
+
+
+                System.out.println(xStart + " , " + yStart);
+
+        }
+        //end of isSum method.
+
+        //method to find the average
+        //of a range of values
+        if(newFormula.get(0).equals("AVG")){
+            double total = 0;
+            
+            //get the string value of the beginning
+            //and ending range.
+            String rangeStart = newFormula.get(2);
+            String rangeEnd = newFormula.get(4);
+            
+            //make the string values of the starting 
+            //range into integers to evaluate in the 
+            //grid
+            int xStart = getXPosition(rangeStart);
+            int yStart = getYPosition(rangeStart);
+
+            //make the string values of the starting range into 
+            //integers to evaluate in the grid.
+            int xEnd = getXPosition(rangeEnd);
+            int yEnd = getYPosition(rangeEnd);
+            
+
+            for (int x = xStart; x < xEnd; x++){
+                for (int y = yStart; y < yEnd; y++){
+                    
+                }
+            }
         }
 
         int operatorIndex = -1;
@@ -102,6 +161,24 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
             answer = evaluatAndSimplify(cellSheet, operatorIndex, newFormula);
         }
         return answer;
+    }
+
+
+    public int avg(){
+        return 1;
+    }
+
+
+    private boolean isRow(int yStart, int yEnd) {
+        return yStart == yEnd;
+    }
+
+    private boolean isColumn(int xStart, int xEnd) {
+        return isRow(xStart, xEnd);
+    }
+
+    private boolean isSum(ArrayList<String> newFormula) {
+        return newFormula.get(0).equals("Sum");
     }
 
     private int getFirstMultiplicationOrDivisionIndex(ArrayList<String> newFormula) {
