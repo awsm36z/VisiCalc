@@ -79,6 +79,17 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
             return resolveToNumber(newFormula.get(0), cellSheet);
         }
 
+        if (newFormula.get(0).equals("Sum")){
+            //double sum = 0.0;
+            String rangeStart = newFormula.get(2);
+            String rangeEnd = newFormula.get(4);
+            int xStart = getXPosition(rangeStart);
+            int yStart = getYPosition(rangeEnd);
+
+            System.out.println(xStart +" , "+ yStart);
+
+        }
+
         int operatorIndex = -1;
 
         // calculate all higher order operations (/ or *) first
