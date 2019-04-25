@@ -13,7 +13,7 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
      *
      */
 
-    private static final double INVALID_VALUE = Double.MAX_VALUE;
+    private static final double INVALID_VALUE = (double)Integer.MAX_VALUE;
     String formula;
     int row;
     int column;
@@ -39,7 +39,8 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
         return this.formula + " ";
     }
 
-    // -----------------Get Value Method, returns literal value of the cell.--------------
+    // -----------------Get Value Method, returns literal value of the
+    // cell.--------------
     public String getValue() {
         return this.formula;
     }
@@ -54,6 +55,7 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
 
     public int compareTo(FormulaCell other) {
         // fix this to actually return comparable.
+        
         return -1;
     }
 
@@ -95,7 +97,7 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
             // -----------------------------------------------------
 
             // if the input has same y, or number ( C3 - D3 )
-            if (isRow(yStart, yEnd)) {
+            if (isColumn(yStart, yEnd)) {
                 for (int x = xStart; x < xEnd; x++) {
 
                     value = cellSheet[x][yEnd].getValue();
@@ -104,8 +106,8 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
                 }
             } else
             // if the input has same letter, or X, ( C1 - C5 )
-            if (isColumn(xStart, xEnd)) {
-                for (int y = yStart; y < yEnd; y++) {
+            if (isRow(xStart, xEnd)) {
+                for (int y = yStart; y < yEnd + 1; y++) {
 
                     value = cellSheet[y][xStart].getValue();
                     sum += Double.parseDouble(value);
@@ -113,8 +115,8 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
             } else
             // if it is a rectangular selection
             {
-                for (int y = yStart; y < yEnd; y++) {
-                    for (int x = xStart; x < xEnd; x++) {
+                for (int y = yStart; y < yEnd + 1; y++) {
+                    for (int x = xStart; x < xEnd + 1; x++) {
 
                         value = cellSheet[y][y].getValue();
                         sum += Double.parseDouble(value);
@@ -129,7 +131,7 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
 
         // method to find the average
         // of a range of values
-        if (extracted(newFormula)) {
+        if (isAvg(newFormula)) {
             double total = 0;
 
             // get the string value of the beginning
@@ -173,15 +175,12 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
         return answer;
     }
 
-    private boolean extracted(ArrayList<String> newFormula) {
+    private boolean isAvg(ArrayList<String> newFormula) {
         return newFormula.get(0).equalsIgnoreCase("AVG");
     }
 
-    
-
-
-
-    //---------------------METHOD TO TAKE IN THE FORMULA AND SOLVE IT----------------------
+    // ---------------------METHOD TO TAKE IN THE FORMULA AND SOLVE
+    // IT----------------------
 
     private double evaluatAndSimplify(Cell[][] cellSheet, int operatorIndex, ArrayList<String> newFormula) {
 
@@ -212,34 +211,30 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
         return answer;
     }
     /*
-    ------------------------------------------------------------------------------------------------------------------------------
-    ------------------------------------ASSISTING METHODS-------------------------------------------------------------------------
-    ------------------------------------------------------------------------------------------------------------------------------
-    Table of Contents: 
-
-    1.calculate
-    2.getXposition
-    3.getYPosition
-    4.resolveToNumber
-    5.isRow
-    6.isColumn
-    7.isSum
-    8.getFirstMultiplicationOrDivisionIndex
-    9.getFirstAdditionOrSubtractionIndex
-    
-    */
+     * -----------------------------------------------------------------------------
+     * -------------------------------------------------
+     * ------------------------------------ASSISTING
+     * METHODS----------------------------------------------------------------------
+     * ---
+     * -----------------------------------------------------------------------------
+     * ------------------------------------------------- Table of Contents:
+     * 
+     * 1.calculate 2.getXposition 3.getYPosition 4.resolveToNumber 5.isRow
+     * 6.isColumn 7.isSum 8.getFirstMultiplicationOrDivisionIndex
+     * 9.getFirstAdditionOrSubtractionIndex
+     * 
+     */
 
     /*
-    1.
-     method to finish calculation by preforming simple task of multiplying the first and second
-    term together.
-    @param: 
-        String operator - the operator will tell us what operation to perform
-        double firstTerm - the first number before the operator
-        double secondTerm - the first number AFTER the operator
-    
-    Used in method Evaluate and Simplify.
-    */
+     * 1. method to finish calculation by preforming simple task of multiplying the
+     * first and second term together.
+     * 
+     * @param: String operator - the operator will tell us what operation to perform
+     * double firstTerm - the first number before the operator double secondTerm -
+     * the first number AFTER the operator
+     * 
+     * Used in method Evaluate and Simplify.
+     */
     private double calculate(String operator, double firstTerm, double secondTerm) {
         double answer = 0.0;
         // Division
@@ -251,60 +246,51 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
         else if (operator.equals("*")) {
             answer = firstTerm * secondTerm;
         }
-        
+
         // Addition
         else if (operator.equals("+")) {
             answer = firstTerm + secondTerm;
         }
-        
+
         // Subtraction
         else {
             answer = firstTerm - secondTerm;
         }
         return answer;
     }
-    /*
-    2.
-    method takes token and  returns the X coordinate of the letter part
-    of the token. Because if uses indexOf, we will get the 0-based index 
-    which will help us because our cellsheet is also 0-based index, so (1,1)
-    is actually (0,0).
 
-    @param
-        token - String with coordinates, ex. "A4"
-    return: int - the x position of the coordinate, ex. "0".
-    */
+    /*
+     * 2. method takes token and returns the X coordinate of the letter part of the
+     * token. Because if uses indexOf, we will get the 0-based index which will help
+     * us because our cellsheet is also 0-based index, so (1,1) is actually (0,0).
+     * 
+     * @param token - String with coordinates, ex. "A4" return: int - the x position
+     * of the coordinate, ex. "0".
+     */
     private int getXPosition(String token) {
         return "ABCDEFG".indexOf(token.substring(0, 1).toUpperCase());
     }
 
-
     /*
-    3.
-    method takes token and  returns the 0 coordinate of the letter part
-    of the token. We will subtract 1 because the method gives us the number
-    which is just parsed from the token, and we want to make the YPosition
-    0-indexed to fit our cellsheet scheme.
-
-    @param
-        String token - String with coordinates, ex. "A4"
-    return: int - the y position of the coordinate, ex. "4".
-    */
+     * 3. method takes token and returns the 0 coordinate of the letter part of the
+     * token. We will subtract 1 because the method gives us the number which is
+     * just parsed from the token, and we want to make the YPosition 0-indexed to
+     * fit our cellsheet scheme.
+     * 
+     * @param String token - String with coordinates, ex. "A4" return: int - the y
+     * position of the coordinate, ex. "4".
+     */
     private int getYPosition(String token) {
         return Integer.parseInt(token.substring(1)) - 1;
     }
 
-
     /**
-     4.
-     * Method will recieve a string that was pre-checked to be a position for a
+     * 4. Method will recieve a string that was pre-checked to be a position for a
      * cell. The method will then return the cell value. But if the cell is not a
      * number cell, it will exit out of the method and tell the user that the input
      * is invalid.
-     * @param 
-     *      String token
-     *      Cell[][] cellsheet
-     * return double 
+     * 
+     * @param String token Cell[][] cellsheet return double
      * 
      */
     public double resolveToNumber(String token, Cell[][] cellSheet) {
@@ -329,33 +315,34 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
     }
 
     /**
-     5.
-     * Method will check to see if the two y coordinates are the same,
-     * ex. "A4 - C4"
+     * 5. Method will check to see if the two y coordinates are the same, ex. "A4 -
+     * C4"
+     * 
      * @param yStart
      * @param yEnd
      * @return boolean
      */
-    private boolean isRow(int yStart, int yEnd) {
+    private boolean isColumn(int yStart, int yEnd) {
         return yStart == yEnd;
     }
 
-
     /*
-     6.
-     * Method will check to see if the two x coordinates are the same,
-     * ex. "A1 - A9"
+     * 6. Method will check to see if the two x coordinates are the same, ex.
+     * "A1 - A9"
+     * 
      * @param xStart
+     * 
      * @param xEnd
+     * 
      * @return
      */
-    private boolean isColumn(int xStart, int xEnd) {
-        return isRow(xStart, xEnd);
+    private boolean isRow(int xStart, int xEnd) {
+        return isColumn(xStart, xEnd);
     }
 
     /**
-     7.
-     * Method will check to see if the ArrayList starts with SUM (ignores case)
+     * 7. Method will check to see if the ArrayList starts with SUM (ignores case)
+     * 
      * @param newFormula
      * @return
      */
@@ -364,18 +351,18 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
     }
 
     /*
-     8.
-     * Assertion: ArrayList will contain multiplication or division - 
-     *     the method is called after the check asserted previously passes.
+     * 8. Assertion: ArrayList will contain multiplication or division - the method
+     * is called after the check asserted previously passes.
      * 
-     * The following method's goal is to achieve the index of the higher order 
-     * opperation. 
-     * To do so, we will check to see if newFormula contains a division sign, if
-     * no, then it returns the index of the the multiplication sign. If yes, it 
-     * checks to see if the array contains the multiplication sign, if no, then it 
-     * retruns the index of the division sign. Otherwise, it will return the smaller 
-     * index of the two operators using Math.min
+     * The following method's goal is to achieve the index of the higher order
+     * opperation. To do so, we will check to see if newFormula contains a division
+     * sign, if no, then it returns the index of the the multiplication sign. If
+     * yes, it checks to see if the array contains the multiplication sign, if no,
+     * then it retruns the index of the division sign. Otherwise, it will return the
+     * smaller index of the two operators using Math.min
+     * 
      * @param newFormula
+     * 
      * @return
      */
     private int getFirstMultiplicationOrDivisionIndex(ArrayList<String> newFormula) {
@@ -389,25 +376,24 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
     }
 
     /*
-     9.
-     * Assertion: ArrayList will contain addition or subtraction - 
-     *     the method is called after the check asserted previously passes.
+     * 9. Assertion: ArrayList will contain addition or subtraction - the method is
+     * called after the check asserted previously passes.
      * 
-     * The following method's goal is to achieve the index of the lower order 
-     * opperation. 
-     * To do so, we will check to see if newFormula contains a subtraction sign, if
-     * no, then it returns the index of the the addition sign. If yes, it 
-     * checks to see if the array contains the addition sign, if no, then it 
-     * retruns the index of the subtraction sign. Otherwise, it will return the smaller 
-     * index of the two operators using Math.min
+     * The following method's goal is to achieve the index of the lower order
+     * opperation. To do so, we will check to see if newFormula contains a
+     * subtraction sign, if no, then it returns the index of the the addition sign.
+     * If yes, it checks to see if the array contains the addition sign, if no, then
+     * it retruns the index of the subtraction sign. Otherwise, it will return the
+     * smaller index of the two operators using Math.min
+     * 
      * @param newFormula
+     * 
      * @return
      */
     private int getFirstAdditionOrSubtractionIndex(ArrayList<String> newFormula) {
         if (newFormula.indexOf("-") == -1) {
             return newFormula.indexOf("+");
-        } 
-        else if (newFormula.indexOf("+") == -1) {
+        } else if (newFormula.indexOf("+") == -1) {
             return newFormula.indexOf("-");
         }
 

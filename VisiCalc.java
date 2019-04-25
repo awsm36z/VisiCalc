@@ -33,6 +33,9 @@ public class VisiCalc {
 
 		//
 		boolean quit = false;
+		
+		
+		//input loop
 		while (!quit) {
 			System.out.println("ENTER:");
 			String input = scOne.nextLine();
@@ -47,6 +50,16 @@ public class VisiCalc {
 	}
 
 	/**
+	 * the following method will take the input and evaulate if it is 
+	 * a quit, print, call, or assignment command.
+	 * 
+	 * Print: prints grid
+	 * 
+	 * Quit: quit the program
+	 * 
+	 * Call: display value of the cell
+	 * 
+	 * Assignment: assign a cell a value.
 	 * @param scOne
 	 * @param cmd
 	 * @param sc
@@ -58,26 +71,26 @@ public class VisiCalc {
 	private static boolean processCommand(String command, Scanner sc, Cell[][] cellSheet, Scanner scOne)
 			throws FileNotFoundException {
 
-		if (command.equalsIgnoreCase("QUIT")) {
+		if (isQuit(command)) {
 			return true;
 		}
 
-		else if (command.equalsIgnoreCase("PRINT")) {
+		else if (isPrint(command)) {
 			Grid spreadsheet = new Grid(cellSheet);
 			cmd = saveCommand(command, cmd);
 			spreadsheet.print(cellSheet);
 		}
 		// Load Function code
-		else if (command.equalsIgnoreCase("LOAD")) {
+		else if (isLoad(command)) {
 			// takes in file to read from user.
 			String fileToRead = sc.next();
 			Scanner commandReader = new Scanner(new File(fileToRead));
-
 			while (commandReader.hasNext()) {
 				String testInput = commandReader.next();
 				processCommand(testInput, commandReader, cellSheet, scOne);
 			}
-		} else if (isACellCoordinate(command)) {
+		} else 
+			if (isACellCoordinate(command)) {
 
 			int x = findX(command);
 			int y = findY(command);
@@ -88,7 +101,8 @@ public class VisiCalc {
 			if (sc.hasNext()) {
 				String nextToken = sc.next();
 				// after cell coordinates, the next token has to be an equal sign
-				if (!nextToken.trim().equals("=")) {
+				// if not, then we will warn the user and request a new input.
+				if (inputNotContainEqual(nextToken)) {
 					System.out.println("invalid token. Expected = sign after cell number");
 					return false;
 				}
@@ -104,31 +118,110 @@ public class VisiCalc {
 			 * Command to just call and find a cell
 			 */
 			else {
-				//Command will evaluate the formula everytime you call it.
-				if(cellSheet[y][x] instanceof FormulaCell){
-					System.out.println(((FormulaCell)cellSheet[y][x]).getValue(cellSheet));
+				// Command will evaluate the formula everytime you call it.
+				if (cellSheet[y][x] instanceof FormulaCell) {
+					System.out.println(((FormulaCell) cellSheet[y][x]).getValue(cellSheet));
 				}
-				//otherwise, just print the literal value.
-				else{
+				// otherwise, just print the literal value.
+				else {
 					System.out.println(cellSheet[y][x].getValue());
 				}
 			}
 		}
 
-		else if (command.equalsIgnoreCase("HELP")) {
-			System.out.println(
-				"type PRINT to print the grid\\n type HELP to see the menu\\n type LOAD to load the file commands\\n type QUIT to quit the program");
+		else if (isHelp(command)) {
+			
+			System.out.println("type PRINT to print the grid\n type HELP to see the menu\n type LOAD to load the file commands\n type QUIT to quit the program");
 		} 
-		else if (command.equalsIgnoreCase("SAVE")) {
+		
+		/*save command:
+			method will either create or load a file that is passed through
+			as a string. Then it will rewrite the file with the commands called
+			in the program. 
+		*/
+		else if (isSave(command)) {
+
 			String fileName = sc.next();
 			PrintStream ps = new PrintStream(new File(fileName));
 			ps.print(cmd);
 		} else {
-			System.out.println(command);
+			System.out.println("invalid input, pleas try again, or type help to see the possiblilities.");
 		}
 		return false;
 	}
 
+
+	/*
+    -------------------------------------------------------------------------------------------------------
+    ------------------------------------ASSISTING METHODS--------------------------------------------------
+    -------------------------------------------------------------------------------------------------------   
+    */
+
+	/*
+	-------------------------------------------------------------------------------------------------------
+	-------------------------------------------------------------------------------------------------------
+	-------------------------Methods to check for inputs and understand inputs.----------------------------
+	-------------------------------------------------------------------------------------------------------
+	-------------------------------------------------------------------------------------------------------
+	*/
+
+	private static boolean isHelp(String command) {
+		return command.equalsIgnoreCase("HELP");
+	}
+
+	private static boolean inputNotContainEqual(String nextToken) {
+		return !nextToken.trim().equals("=");
+	}
+
+	private static boolean isLoad(String command) {
+		return command.equalsIgnoreCase("LOAD");
+	}
+
+	private static boolean isPrint(String command) {
+		return command.equalsIgnoreCase("PRINT");
+	}
+
+	private static boolean isQuit(String command) {
+		return command.equalsIgnoreCase("QUIT");
+	}
+
+	private static boolean isACellCoordinate(String command) {
+		return "ABCDEFG".contains(command.substring(0, 1));
+	}
+	
+	private static boolean isSave(String command) {
+		return command.equalsIgnoreCase("SAVE");
+	}
+
+	private static boolean isAFormula(String nextToken) {
+		// Check for Parenthase which signals formula
+		return nextToken.contains("(");
+	}
+
+	private static boolean isAString(String nextToken) {
+		return nextToken.contains("\"");
+	}
+
+	private static boolean isADate(String nextToken) {
+		return nextToken.contains("/");
+	}
+
+	/*
+	-------------------------------------------------------------------------------------------------------
+	-------------------------------------------------------------------------------------------------------
+	-------------------------------------------------------------------------------------------------------
+	-------------------------------------------------------------------------------------------------------
+	-------------------------------------------------------------------------------------------------------
+	*/
+
+	/*
+	Action methods. This includes findY, findX, getCellContent, and saveCommand.
+	-------------------------------------------------------------------------------------------------------
+	-------------------------------------------------------------------------------------------------------
+	-------------------------------------------------------------------------------------------------------
+	-------------------------------------------------------------------------------------------------------
+	-------------------------------------------------------------------------------------------------------
+	*/
 	private static int findY(String command) {
 		return Integer.parseInt(command.substring(1)) - 1;
 	}
@@ -137,9 +230,10 @@ public class VisiCalc {
 		return "ABCDEFG".indexOf(command.substring(0, 1));
 	}
 
-	private static boolean isACellCoordinate(String command) {
-		return "ABCDEFG".contains(command.substring(0, 1));
+	private static String removeParenthasies(String nextToken) {
+		return nextToken.substring(3, nextToken.length() - 2);
 	}
+
 
 	private static Cell getCellContent(int x, int y, String nextToken) {
 
@@ -176,22 +270,7 @@ public class VisiCalc {
 		}
 	}
 
-	private static String removeParenthasies(String nextToken) {
-		return nextToken.substring(3, nextToken.length() - 2);
-	}
 
-	private static boolean isAFormula(String nextToken) {
-		// Check for Parenthase which signals formula
-		return nextToken.contains("(");
-	}
-
-	private static boolean isAString(String nextToken) {
-		return nextToken.contains("\"");
-	}
-
-	private static boolean isADate(String nextToken) {
-		return nextToken.contains("/");
-	}
 
 	private static String saveCommand(String input, String cmd) {
 		cmd += input + " ";
