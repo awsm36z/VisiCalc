@@ -13,7 +13,7 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
      *
      */
 
-    private static final double INVALID_VALUE = (double)Integer.MAX_VALUE;
+    private static final double INVALID_VALUE = (double) Integer.MAX_VALUE;
     String formula;
     int row;
     int column;
@@ -55,7 +55,7 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
 
     public int compareTo(FormulaCell other) {
         // fix this to actually return comparable.
-        
+
         return -1;
     }
 
@@ -85,45 +85,7 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
         // sum of a range of values.
         if (isSum(newFormula)) {
             double sum = 0.0;
-            String rangeStart = newFormula.get(1);
-            String rangeEnd = newFormula.get(3);
-            int xStart = getXPosition(rangeStart);
-            int yStart = getYPosition(rangeStart);
-
-            int xEnd = getXPosition(rangeEnd);
-            int yEnd = getYPosition(rangeEnd);
-            // ----------------------------------------------cant add the values for some
-            // reason, read the code to gain better understanding
-            // -----------------------------------------------------
-
-            // if the input has same y, or number ( C3 - D3 )
-            if (isColumn(yStart, yEnd)) {
-                for (int x = xStart; x < xEnd; x++) {
-
-                    value = cellSheet[x][yEnd].getValue();
-                    sum += Double.parseDouble(value);
-
-                }
-            } else
-            // if the input has same letter, or X, ( C1 - C5 )
-            if (isRow(xStart, xEnd)) {
-                for (int y = yStart; y < yEnd + 1; y++) {
-
-                    value = cellSheet[y][xStart].getValue();
-                    sum += Double.parseDouble(value);
-                }
-            } else
-            // if it is a rectangular selection
-            {
-                for (int y = yStart; y < yEnd + 1; y++) {
-                    for (int x = xStart; x < xEnd + 1; x++) {
-
-                        value = cellSheet[y][y].getValue();
-                        sum += Double.parseDouble(value);
-
-                    }
-                }
-            }
+            sum = getSum(cellSheet, newFormula, sum);
 
             return sum;
         }
@@ -133,33 +95,30 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
         // of a range of values
         if (isAvg(newFormula)) {
             double total = 0;
+            double sum = 0.0;
+            int count = 0;
 
-            // get the string value of the beginning
-            // and ending range.
             String rangeStart = newFormula.get(2);
             String rangeEnd = newFormula.get(4);
 
-            // make the string values of the starting
-            // range into integers to evaluate in the
-            // grid
             int xStart = getXPosition(rangeStart);
             int yStart = getYPosition(rangeStart);
 
-            // make the string values of the starting range into
-            // integers to evaluate in the grid.
             int xEnd = getXPosition(rangeEnd);
             int yEnd = getYPosition(rangeEnd);
 
-            int count = 0;
-            for (int x = xStart; x < xEnd; x++) {
-                for (int y = yStart; y < yEnd; y++) {
+
+            for (int y = yStart; y < yEnd + 1; y++) {
+                for (int x = xStart; x < xEnd + 1; x++) {
                     count++;
                     value = cellSheet[y][x].getValue();
-
+                    sum += Double.parseDouble(value);
                 }
             }
 
+            return sum/count;
         }
+
 
         int operatorIndex = -1;
 
@@ -173,6 +132,26 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
             answer = evaluatAndSimplify(cellSheet, operatorIndex, newFormula);
         }
         return answer;
+    }
+
+    private double getSum(Cell[][] cellSheet, ArrayList<String> newFormula, double sum) {
+        String rangeStart = newFormula.get(1);
+        String rangeEnd = newFormula.get(3);
+        int xStart = getXPosition(rangeStart);
+        int yStart = getYPosition(rangeStart);
+
+        int xEnd = getXPosition(rangeEnd);
+        int yEnd = getYPosition(rangeEnd);
+
+        for (int y = yStart; y < yEnd + 1; y++) {
+            for (int x = xStart; x < xEnd + 1; x++) {
+
+                value = cellSheet[y][x].getValue();
+                sum += Double.parseDouble(value);
+
+            }
+        }
+        return sum;
     }
 
     private boolean isAvg(ArrayList<String> newFormula) {
@@ -212,12 +191,12 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
     }
     /*
      * -----------------------------------------------------------------------------
-     * -------------------------------------------------
-     * ------------------------------------ASSISTING
-     * METHODS----------------------------------------------------------------------
-     * ---
      * -----------------------------------------------------------------------------
-     * ------------------------------------------------- Table of Contents:
+     * ------------------------------------ASSISTING METHODS------------------------
+     * -----------------------------------------------------------------------------
+     * -----------------------------------------------------------------------------
+     * 
+     * Table of Contents:
      * 
      * 1.calculate 2.getXposition 3.getYPosition 4.resolveToNumber 5.isRow
      * 6.isColumn 7.isSum 8.getFirstMultiplicationOrDivisionIndex
