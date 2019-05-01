@@ -127,13 +127,13 @@ public class Grid {
 	}
 
 	/**
-	 * 
+	 * Draw border method, draws the dashes and stars
 	 */
 	private void drawBorder() {
-		System.out.print("----+");
+		System.out.print("----*");
 		for (int i = 0; i < 7; i++) {
 
-			System.out.print("---------+");
+			System.out.print("---------*");
 		}
 		System.out.println("");
 	}

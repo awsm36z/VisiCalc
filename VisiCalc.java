@@ -33,9 +33,8 @@ public class VisiCalc {
 
 		//
 		boolean quit = false;
-		
-		
-		//input loop
+
+		// input loop
 		while (!quit) {
 			System.out.println("ENTER:");
 			String input = scOne.nextLine();
@@ -50,8 +49,8 @@ public class VisiCalc {
 	}
 
 	/**
-	 * the following method will take the input and evaulate if it is 
-	 * a quit, print, call, or assignment command.
+	 * the following method will take the input and evaulate if it is a quit, print,
+	 * call, or assignment command.
 	 * 
 	 * Print: prints grid
 	 * 
@@ -60,6 +59,9 @@ public class VisiCalc {
 	 * Call: display value of the cell
 	 * 
 	 * Assignment: assign a cell a value.
+	 * 
+	 * SORTA and SORTD: sorts the arrays given upward or downward depending on
+	 * 
 	 * @param scOne
 	 * @param cmd
 	 * @param sc
@@ -89,8 +91,7 @@ public class VisiCalc {
 				String testInput = commandReader.next();
 				processCommand(testInput, commandReader, cellSheet, scOne);
 			}
-		} else 
-			if (isACellCoordinate(command)) {
+		} else if (isACellCoordinate(command)) {
 
 			int x = findX(command);
 			int y = findY(command);
@@ -130,40 +131,57 @@ public class VisiCalc {
 		}
 
 		else if (isHelp(command)) {
-			
-			System.out.println("type PRINT to print the grid\n type HELP to see the menu\n type LOAD to load the file commands\n type QUIT to quit the program");
-		} 
-		
-		/*save command:
-			method will either create or load a file that is passed through
-			as a string. Then it will rewrite the file with the commands called
-			in the program. 
-		*/
+
+			System.out.println(
+					"type PRINT to print the grid\n type HELP to see the menu\n type LOAD to load the file commands\n type QUIT to quit the program");
+		}
+
+		/*
+		 * save command: method will either create or load a file that is passed through
+		 * as a string. Then it will rewrite the file with the commands called in the
+		 * program.
+		 */
 		else if (isSave(command)) {
 
 			String fileName = sc.next();
 			PrintStream ps = new PrintStream(new File(fileName));
 			ps.print(cmd);
-		} else {
+		}
+
+		/*
+		 * this is the SORTA AND SORTD method.--------------------
+		 */
+		else if (command.equalsIgnoreCase("sorta") || command.equalsIgnoreCase("sortd")) {
+			if (command.equalsIgnoreCase("sorta")) {
+
+			}
+		}
+
+		else {
 			System.out.println("invalid input, pleas try again, or type help to see the possiblilities.");
 		}
 		return false;
 	}
 
+	/*
+	 * -----------------------------------------------------------------------------
+	 * -------------------------- ------------------------------------ASSISTING
+	 * METHODS--------------------------------------------------
+	 * -----------------------------------------------------------------------------
+	 * --------------------------
+	 */
 
 	/*
-    -------------------------------------------------------------------------------------------------------
-    ------------------------------------ASSISTING METHODS--------------------------------------------------
-    -------------------------------------------------------------------------------------------------------   
-    */
-
-	/*
-	-------------------------------------------------------------------------------------------------------
-	-------------------------------------------------------------------------------------------------------
-	-------------------------Methods to check for inputs and understand inputs.----------------------------
-	-------------------------------------------------------------------------------------------------------
-	-------------------------------------------------------------------------------------------------------
-	*/
+	 * -----------------------------------------------------------------------------
+	 * --------------------------
+	 * -----------------------------------------------------------------------------
+	 * -------------------------- -------------------------Methods to check for
+	 * inputs and understand inputs.----------------------------
+	 * -----------------------------------------------------------------------------
+	 * --------------------------
+	 * -----------------------------------------------------------------------------
+	 * --------------------------
+	 */
 
 	private static boolean isHelp(String command) {
 		return command.equalsIgnoreCase("HELP");
@@ -188,7 +206,7 @@ public class VisiCalc {
 	private static boolean isACellCoordinate(String command) {
 		return "ABCDEFG".contains(command.substring(0, 1));
 	}
-	
+
 	private static boolean isSave(String command) {
 		return command.equalsIgnoreCase("SAVE");
 	}
@@ -207,21 +225,31 @@ public class VisiCalc {
 	}
 
 	/*
-	-------------------------------------------------------------------------------------------------------
-	-------------------------------------------------------------------------------------------------------
-	-------------------------------------------------------------------------------------------------------
-	-------------------------------------------------------------------------------------------------------
-	-------------------------------------------------------------------------------------------------------
-	*/
+	 * -----------------------------------------------------------------------------
+	 * --------------------------
+	 * -----------------------------------------------------------------------------
+	 * --------------------------
+	 * -----------------------------------------------------------------------------
+	 * --------------------------
+	 * -----------------------------------------------------------------------------
+	 * --------------------------
+	 * -----------------------------------------------------------------------------
+	 * --------------------------
+	 */
 
 	/*
-	Action methods. This includes findY, findX, getCellContent, and saveCommand.
-	-------------------------------------------------------------------------------------------------------
-	-------------------------------------------------------------------------------------------------------
-	-------------------------------------------------------------------------------------------------------
-	-------------------------------------------------------------------------------------------------------
-	-------------------------------------------------------------------------------------------------------
-	*/
+	 * Action methods. This includes findY, findX, getCellContent, and saveCommand.
+	 * -----------------------------------------------------------------------------
+	 * --------------------------
+	 * -----------------------------------------------------------------------------
+	 * --------------------------
+	 * -----------------------------------------------------------------------------
+	 * --------------------------
+	 * -----------------------------------------------------------------------------
+	 * --------------------------
+	 * -----------------------------------------------------------------------------
+	 * --------------------------
+	 */
 	private static int findY(String command) {
 		return Integer.parseInt(command.substring(1)) - 1;
 	}
@@ -233,7 +261,6 @@ public class VisiCalc {
 	private static String removeParenthasies(String nextToken) {
 		return nextToken.substring(3, nextToken.length() - 2);
 	}
-
 
 	private static Cell getCellContent(int x, int y, String nextToken) {
 
@@ -269,8 +296,6 @@ public class VisiCalc {
 			return newNumberCell;
 		}
 	}
-
-
 
 	private static String saveCommand(String input, String cmd) {
 		cmd += input + " ";
