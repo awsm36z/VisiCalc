@@ -26,7 +26,7 @@ public class NumberCell extends Cell implements Comparable<NumberCell> {
 			return strNum + "  ";
 		}
 		if(strNum.length() == 3){
-			return strNum + " ";
+			return strNum + "  ";
 		}
 		if (strNum.length() == 4){
 			return strNum + " ";

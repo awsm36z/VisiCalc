@@ -98,8 +98,8 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
             double sum = 0.0;
             int count = 0;
 
-            String rangeStart = newFormula.get(2);
-            String rangeEnd = newFormula.get(4);
+            String rangeStart = newFormula.get(1);
+            String rangeEnd = newFormula.get(3);
 
             int xStart = getXPosition(rangeStart);
             int yStart = getYPosition(rangeStart);
@@ -110,13 +110,16 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
 
             for (int y = yStart; y < yEnd + 1; y++) {
                 for (int x = xStart; x < xEnd + 1; x++) {
+    
                     count++;
                     value = cellSheet[y][x].getValue();
                     sum += Double.parseDouble(value);
+    
                 }
             }
 
-            return sum/count;
+            double result = (sum/count);
+            return result;
         }
 
 

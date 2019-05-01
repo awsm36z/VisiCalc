@@ -19,3 +19,8 @@ C4 = 10
 print
 C5 = 30
 print
+A2 = "SUM:"
+A3 = ( SUM C4 - C6 )
+B1 = "AVG"
+B2 = ( AVG C4 - C6 )
+print
