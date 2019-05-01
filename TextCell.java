@@ -11,13 +11,18 @@ public class TextCell extends Cell implements Comparable <TextCell>{
 		// TODO Auto-generated constructor stub 
 		this.text = text;
 	}
+	
+	//String print method.
 	public String toString() {
 		
 		if (this.text.length()>9) {
 			return this.text.substring(0, 9);
 		}		
-		return this.text.substring(0,this.text.length());
-
+		if(this.text.length()%2 == 1) {
+		return this.text.substring(0,this.text.length()-1) + " ";
+		}
+		return this.text.substring(0,this.text.length() - 1);
+		
 	
 	}
 	

@@ -1,26 +1,16 @@
-A1 = 04/17/19
-C3 = " Constants "
-C4 = 3
-C5 = -5
-C6 = 100
-C7 = -5678
+D8 = 3
+D9 = 10
+D10 = 22
+F4 = ( SUM D8 - D10 )
+F5 = ( AVG D8 - D10 )
 print
-A7 = " Formulas 1 "
-A8 = ( 1 + 2 )
-A9 = ( C4 - 4 )
-A10 = ( C7 )
-G6 = " Formulas 2 "
-G7 = ( C4 )
-G8 = ( C5 + 10 )
-G9 = ( C6 / C5 * 2 )
-G10 = ( 5000 - C7 / C6 )
+D8 = 10000
 print
-C4 = 10
+A4 = 13
+B4 = -200
+C4 = 1.5
+G1 = ( SUM A4 - C4 )
+G2 = ( AVG A4 - C4 )
 print
-C5 = 30
-print
-A2 = "SUM:"
-A3 = ( SUM C4 - C6 )
-B1 = "AVG"
-B2 = ( AVG C4 - C6 )
+A4 = -5000
 print

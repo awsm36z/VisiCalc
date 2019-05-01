@@ -6,7 +6,7 @@ VisiCalc Project
 */
 public class Grid {
 	Cell[][] spreadsheet;
- 
+
 	public Grid(Cell[][] spreadsheet) {
 		this.spreadsheet = spreadsheet;
 	}
@@ -27,16 +27,15 @@ public class Grid {
 		}
 		System.out.println("");
 		drawBorder();
-		
-		
-		//draws the rows and numbers them.
+
+		// draws the rows and numbers them.
 		for (int y = 0; y < 10; y++) {
 
 			if (y > 8) {
 				System.out.print(" " + (y + 1) + " ");
 			}
-			//We now print out the rows on the relation of the 
-			//size of the index.
+			// We now print out the rows on the relation of the
+			// size of the index.
 			else {
 				System.out.print("  " + (y + 1) + " ");
 			}
@@ -45,37 +44,16 @@ public class Grid {
 
 			for (int x = 0; x < 7; x++) {
 				String content;
-				//Will check to see if is formula to then
-				//evaluate it using the formula cell evaluate
-				//method.
-				if(spreadsheet[y][x] instanceof FormulaCell){
-					content = ((FormulaCell)spreadsheet[y][x]).getValue(cellSheet);
-				}
-					else{
-						content = spreadsheet[y][x].toString();
-					}
-				if (content.length() > 9) {
-					//When the value is larger than the max size
-					//we will shrink it and display a smaller version.
-					content = content.substring(0, 9);
-					printSpaces(content);
-					System.out.print(content);
-					printSpaces(content);
-					System.out.print("|");
-				}
-				else if (content.length() == 0) {
-					printSpaces(content);
-					System.out.print(content);
-					printSpaces(content);
-					System.out.print(" |");
-				}else {
-					printSpaces(content);
-					System.out.print(content);
-					printSpaces(content);
-					System.out.print("|");
+				// Will check to see if is formula to then
+				// evaluate it using the formula cell evaluate
+				// method.
+				if (spreadsheet[y][x] instanceof FormulaCell) {
+					content = ((FormulaCell) spreadsheet[y][x]).getValue(cellSheet);
+				} else {
+					content = spreadsheet[y][x].toString();
 				}
 
-
+				printContent(content);
 
 			}
 			System.out.println("");
@@ -85,6 +63,67 @@ public class Grid {
 		}
 		System.out.println("\n \n");
 
+	}
+
+	private void printContent(String content) {
+		if (contentSizeIsOdd(content)) {
+
+			printOddSizedContent(content);
+
+		} else {
+			printEvenSizedContent(content);
+
+		}
+	}
+
+	private boolean contentSizeIsOdd(String content) {
+		return !(content.length() % 2 == 0);
+	}
+
+	private void printOddSizedContent(String content) {
+		if (content.length() > 10) {
+			// When the value is larger than the max size
+			// we will shrink it and display a smaller version.
+
+			content = content.substring(0, 9);
+			printSpaces(content);
+			System.out.print(content);
+			printSpaces(content);
+			System.out.print("|");
+		} else if (content.length() == 0) {
+			printSpaces(content);
+			System.out.print(content);
+			printSpaces(content);
+			System.out.print(" |");
+		} else {
+			printSpaces(content);
+			System.out.print(content);
+			printSpaces(content);
+			System.out.print("|");
+		}
+	}
+
+	private void printEvenSizedContent(String content) {
+		if (content.length() > 10) {
+			// When the value is larger than the max size
+			// we will shrink it and display a smaller version.
+
+			content = content.substring(0, 9);
+			printSpaces(content);
+			System.out.print(content);
+			printSpaces(content);
+			System.out.print("|");
+		} else if (content.length() == 0) {
+			printSpaces(content);
+			System.out.print(content);
+			printSpaces(content);
+			System.out.print(" |");
+		} else {
+			printSpaces(content);
+			System.out.print(content);
+			printSpaces(content);
+			System.out.print("|");
+		}
 	}
 
 	/**
@@ -116,7 +155,5 @@ public class Grid {
 			System.out.print(" ");
 		}
 	}
-	
-	
 
 }

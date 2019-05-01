@@ -50,7 +50,28 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
         if (INVALID_VALUE == answer) {
             return ("NaN");
         }
-        return answer + "";
+        
+		String strNum = answer + "";
+		if (strNum.length()==2){
+			return strNum + "  ";
+		}
+		if(strNum.length() == 3){
+			return strNum + "  ";
+		}
+		if (strNum.length() == 4){
+			return strNum + " ";
+		}
+		if (strNum.length() == 5){
+			return strNum + "  ";
+		}
+		if (strNum.length() == 6){
+			return strNum + " ";
+		}
+		if (strNum.length() == 7){
+			return strNum + "  ";
+		}
+		return strNum + " ";
+        
     }
 
     public int compareTo(FormulaCell other) {
