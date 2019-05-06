@@ -28,9 +28,7 @@ clear C10
 C1 = (  A2 - 4 * 3 % 5 * D2 % D4 )
 print
 load VCcommands.txt
-print
 SORTA A1 - A3
 SORTD B2 - B4
 SORTA C8 - C10
-print
 quit

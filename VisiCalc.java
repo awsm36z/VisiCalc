@@ -15,9 +15,9 @@ VisiCalc Project
  * 5. Rectangular Average			   |+2
  * 6. Rectangular Sort				   |+3
  * 7. Sort mixed types.				   |+2
- * 8.
+ * 8.Jframe 						   |+10
  * -------------------------------------------------
- * Total:------------------------------|+18
+ * Total:------------------------------|+28
  */
 
 import java.io.File;
@@ -28,6 +28,9 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class VisiCalc {
+
+
+
 
 	static String cmd = "";
 
@@ -334,6 +337,7 @@ public class VisiCalc {
 
 	private static void printGrid(String command, Cell[][] cellSheet) {
 		Grid spreadsheet = new Grid(cellSheet);
+		new JframeUI(cellSheet);
 		cmd = saveCommand(command, cmd);
 		spreadsheet.print(cellSheet);
 	}
