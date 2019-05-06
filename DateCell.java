@@ -4,11 +4,12 @@ P.1
 Mulvaney
 VisiCalc Project
 */
-public class DateCell extends Cell {
+public class DateCell extends Cell implements Comparable <Cell> {
 		
-	int day;
-	int month;
-	int year;
+	private int day;
+	private int month;
+	private int year;
+	private int numericleValue;
 	
 	public DateCell(int x, int y, int day, int month, int year) {
 		super(x,y);
@@ -16,6 +17,8 @@ public class DateCell extends Cell {
 		this.day = day;
 		this.month = month;
 		this.year = year;
+
+		this.numericleValue = (this.day)+(this.month*30)+(this.year*365);
 	}
 
 	public DateCell(int x, int y, String strDate){
@@ -27,6 +30,8 @@ public class DateCell extends Cell {
 		this.day = day;
 		this.month = month;
 		this.year = year;
+
+		this.numericleValue = (this.day)+(this.month*30)+(this.year*365);
 	}
 	
 	public void setDay(int day) {
@@ -48,4 +53,23 @@ public class DateCell extends Cell {
 	public String getValue() {
 		return this.month + "/"+ this.day + "/" + this.year;
 	}
+
+	public int compareTo (Cell other){
+		if (other instanceof TextCell){
+			return -1;
+		}
+		if (other instanceof FormulaCell){
+			return 1;
+		}
+		if (other instanceof NumberCell){
+			return -1;
+		}
+		if (other instanceof DateCell){
+			return this.numericleValue - ((DateCell)other).numericleValue;
+		}
+		
+		return 1;
+	}
+
+
 }

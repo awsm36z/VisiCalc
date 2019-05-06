@@ -1,16 +1,36 @@
-D8 = 3
-D9 = 10
-D10 = 22
-F4 = ( SUM D8 - D10 )
-F5 = ( AVG D8 - D10 )
+A1 = 5
+A2 = -3
+A3 = 0
+B2 = " amazon "
+B3 = " microsoft "
+B4 = " facebook "
+C8 = 12/07/1941
+C9 = 11/22/1963
+C10 = 11/04/2008
 print
-D8 = 10000
+D1 = ( 1 + 2 )
+D2 = ( A1 + 3 )
+D3 = ( A2 - A1 )
+D4 = ( A1 * A3 )
+D5 = ( A1 / A2 )
 print
-A4 = 13
-B4 = -200
-C4 = 1.5
-G1 = ( SUM A4 - C4 )
-G2 = ( AVG A4 - C4 )
+D6 = ( A1 + A2 + A3 )
+D7 = ( A3 * A1 + -1000 )
 print
-A4 = -5000
+A1 = 100
 print
+E9 = ( SUM A1 - A3 )
+E10 = ( AVG A1 - A3 )
+save VCcommands.txt
+print
+clear A1
+clear C10
+C1 = (  A2 - 4 * 3 % 5 * D2 % D4 )
+print
+load VCcommands.txt
+print
+SORTA A1 - A3
+SORTD B2 - B4
+SORTA C8 - C10
+print
+quit

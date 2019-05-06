@@ -8,15 +8,14 @@ VisiCalc Project
 
 import java.util.*;
 
-public class FormulaCell extends Cell implements Comparable<FormulaCell> {
+public class FormulaCell extends Cell implements Comparable<Cell> {
     /**
      *
      */
 
     private static final double INVALID_VALUE = (double) Integer.MAX_VALUE;
-    String formula;
-    int row;
-    int column;
+   
+    private String formula;
 
     public FormulaCell(String formula, int row, int column) {
         super(row, column);
@@ -74,10 +73,24 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
         
     }
 
-    public int compareTo(FormulaCell other) {
-        // fix this to actually return comparable.
+    public int compareTo(Cell other) {
+            // fix this to actually return comparable.
+        //double thisValue = Double.parseDouble(this.getValue(cellsheet));
+        //double otherValue = Double.parseDouble(other.getValue(cellsheet));
 
-        return -1;
+        if(other instanceof TextCell){
+            return -1;
+        }
+        if(other instanceof NumberCell){
+            return -1;
+        }
+        if (other instanceof DateCell){
+            return -1;
+        }
+        if (other instanceof FormulaCell){
+            return 0;
+        }
+        return 1;
     }
 
     public double solve(Cell[][] cellSheet) {
@@ -115,7 +128,6 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
         // method to find the average
         // of a range of values
         if (isAvg(newFormula)) {
-            double total = 0;
             double sum = 0.0;
             int count = 0;
 
@@ -131,11 +143,16 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
 
             for (int y = yStart; y < yEnd + 1; y++) {
                 for (int x = xStart; x < xEnd + 1; x++) {
-    
-                    count++;
-                    value = cellSheet[y][x].getValue();
-                    sum += Double.parseDouble(value);
-    
+                    if (cellSheet[y][x] instanceof NumberCell){
+                        count++;
+                        value = cellSheet[y][x].getValue();
+                        sum += Double.parseDouble(value);
+                    }
+                    if (cellSheet[y][x] instanceof FormulaCell){
+                        count++;
+                        value = ((FormulaCell)cellSheet[y][x]).getValue(cellSheet);
+                        sum += Double.parseDouble(value);
+                    }
                 }
             }
 
@@ -145,6 +162,21 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
 
 
         int operatorIndex = -1;
+
+        answer = solveWithOrderofOps(cellSheet, answer, newFormula);
+        return answer;
+    }
+
+    private double solveWithOrderofOps(Cell[][] cellSheet, double answer, ArrayList<String> newFormula) {
+        int operatorIndex;
+        while (((operatorIndex = getParenthasiesIndex(newFormula)) != -1) && answer != INVALID_VALUE) {
+            operatorIndex += 2;
+            answer = evaluatAndSimplify(cellSheet, operatorIndex, newFormula);
+        }
+
+        while (((operatorIndex = getExponentsIndex(newFormula)) != -1) && answer != INVALID_VALUE) {
+            answer = evaluatAndSimplify(cellSheet, operatorIndex, newFormula);
+        }
 
         // calculate all higher order operations (/ or *) first
         while (((operatorIndex = getFirstMultiplicationOrDivisionIndex(newFormula)) != -1) && answer != INVALID_VALUE) {
@@ -170,9 +202,15 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
         for (int y = yStart; y < yEnd + 1; y++) {
             for (int x = xStart; x < xEnd + 1; x++) {
 
-                value = cellSheet[y][x].getValue();
-                sum += Double.parseDouble(value);
-
+                if (cellSheet[y][x] instanceof NumberCell){
+                    value = cellSheet[y][x].getValue();
+                    sum += Double.parseDouble(value);
+                }
+                //if statement to check and return the value for formula methods.
+                if (cellSheet[y][x] instanceof FormulaCell){
+                    value = ((FormulaCell)cellSheet[y][x]).getValue(cellSheet);
+                    sum += Double.parseDouble(value);
+                }
             }
         }
         return sum;
@@ -182,8 +220,7 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
         return newFormula.get(0).equalsIgnoreCase("AVG");
     }
 
-    // ---------------------METHOD TO TAKE IN THE FORMULA AND SOLVE
-    // IT----------------------
+    // ---------------------METHOD TO TAKE IN THE FORMULA AND SOLVE IT----------------------
 
     private double evaluatAndSimplify(Cell[][] cellSheet, int operatorIndex, ArrayList<String> newFormula) {
 
@@ -253,6 +290,16 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
         // Addition
         else if (operator.equals("+")) {
             answer = firstTerm + secondTerm;
+        }
+
+        //Modulus
+        else if (operator.equals("%")){
+            answer = firstTerm%secondTerm;
+        }
+
+        //Exponents
+        else if(operator.equals("^")){
+            answer = Math.pow(firstTerm, secondTerm);
         }
 
         // Subtraction
@@ -370,12 +417,26 @@ public class FormulaCell extends Cell implements Comparable<FormulaCell> {
      */
     private int getFirstMultiplicationOrDivisionIndex(ArrayList<String> newFormula) {
         if (newFormula.indexOf("/") == -1) {
-            return newFormula.indexOf("*");
-        } else if (newFormula.indexOf("*") == -1) {
-            return newFormula.indexOf("/");
-        }
+            if (newFormula.indexOf("*") == -1) {
+                return newFormula.indexOf("%");
+            }
+            return Math.min(newFormula.indexOf("%"), newFormula.indexOf("*"));
+        } 
+        else if (newFormula.indexOf("*") == -1) {
+            if (newFormula.indexOf("/") == -1) {
+                return newFormula.indexOf("%");
+            }
+            return Math.min(newFormula.indexOf("%"), newFormula.indexOf("/"));        }
 
-        return Math.min(newFormula.indexOf("/"), newFormula.indexOf("*"));
+        return Math.min(Math.min(newFormula.indexOf("/"), newFormula.indexOf("*")), newFormula.indexOf("%"));
+    }
+
+    private int getParenthasiesIndex(ArrayList<String> newFormula) {
+        return newFormula.indexOf("(");
+    }
+
+    private int getExponentsIndex(ArrayList<String> newFormula) {
+        return newFormula.indexOf("^");
     }
 
     /*

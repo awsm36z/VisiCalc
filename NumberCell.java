@@ -4,8 +4,9 @@ P.1
 Mulvaney
 VisiCalc Project
 */
-public class NumberCell extends Cell implements Comparable<NumberCell> {
+public class NumberCell extends Cell implements Comparable<Cell> {
 	double number;
+
 	public NumberCell(int row, int column, double number) {
 		super(row, column);
 		this.number = number;
@@ -43,14 +44,15 @@ public class NumberCell extends Cell implements Comparable<NumberCell> {
 		return strNum + " ";
 	}
 
-	public int compareTo(NumberCell other) {
+	public int compareTo(Cell other) {
 		// TODO Auto-generated method stub
-		if(this.number - other.number > 0) {
-			return 1;
+		if(other instanceof NumberCell){
+			return (int)((this.number) - (other.toDouble()));
 		}
-		if (this.number - other.number < 0) {
+		if(other instanceof TextCell){
 			return -1;
 		}
-		return 0;
+
+		return 1;
 	}
 }
