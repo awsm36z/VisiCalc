@@ -110,7 +110,7 @@ public class FormulaCell extends Cell implements Comparable<Cell> {
             newFormula.add(equationScanner.next());
         }
         equationScanner.close();
-
+        //if it is only assigning a cell to another cell.
         if (newFormula.size() == 1) {
             return resolveToNumber(newFormula.get(0), cellSheet);
         }

@@ -53,6 +53,7 @@ public class VisiCalc {
 		//
 		boolean quit = false;
 
+		JframeUI jfram = new JframeUI(cellSheet);
 		// input loop
 		while (!quit) {
 			System.out.println("ENTER:");
@@ -63,7 +64,7 @@ public class VisiCalc {
 			// we will name the variable: command for simplicity, assuming cell numbers
 			// are an implicit command to move to that cell.
 			String command = sc.next();
-			quit = processCommand(command, sc,  cellSheet, scOne);
+			quit = processCommand(command, sc,  cellSheet, scOne, jfram);
 		}
 	}
 
@@ -89,7 +90,7 @@ public class VisiCalc {
 	 * @return boolean
 	 * @throws FileNotFoundException
 	 */
-	private static boolean processCommand(String command, Scanner sc, Cell[][]  cellSheet, Scanner scOne)
+	private static boolean processCommand(String command, Scanner sc, Cell[][]  cellSheet, Scanner scOne, JframeUI jfram)
 			throws FileNotFoundException {
 
 		if (isQuit(command)) {
@@ -103,7 +104,7 @@ public class VisiCalc {
 		else if (isLoad(command)) {
 
 			// takes in file to read from user.
-			loadFileCommands(sc, cellSheet, scOne);
+			loadFileCommands(sc, cellSheet, scOne, jfram);
 
 		} else if (isClearMethod(command)) {
 
@@ -200,12 +201,12 @@ public class VisiCalc {
 		return true;
 	}
 
-	private static void loadFileCommands(Scanner sc, Cell[][] cellSheet, Scanner scOne) throws FileNotFoundException {
+	private static void loadFileCommands(Scanner sc, Cell[][] cellSheet, Scanner scOne, JframeUI jfram) throws FileNotFoundException {
 		String fileToRead = sc.next();
 		Scanner commandReader = new Scanner(new File(fileToRead));
 		while (commandReader.hasNext()) {
 			String testInput = commandReader.next();
-			processCommand(testInput, commandReader, cellSheet, scOne);
+			processCommand(testInput, commandReader, cellSheet, scOne, jfram);
 		}
 	}
 
@@ -337,9 +338,9 @@ public class VisiCalc {
 
 	private static void printGrid(String command, Cell[][] cellSheet) {
 		Grid spreadsheet = new Grid(cellSheet);
-		new JframeUI(cellSheet);
 		cmd = saveCommand(command, cmd);
 		spreadsheet.print(cellSheet);
+
 	}
 
 	/*

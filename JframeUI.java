@@ -1,8 +1,13 @@
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
+import javax.swing.event.*;
 
-public class JframeUI {
+
+public class JframeUI implements TableModelListener {
     // frame
     JFrame f;
     // Table
@@ -33,5 +38,19 @@ public class JframeUI {
         f.setSize(500, 200);
         // Frame Visible = true
         f.setVisible(true);
+
+        f.getModel().addTableModelListener(this);
+
+    }
+
+    @Override
+    public void tableChanged(TableModelEvent e) {
+        int row = e.getFirstRow();
+        int column = e.getColumn();
+        TableModel model = (TableModel)e.getSource();
+        String columnName = model.getColumnName(column);
+        Object data = model.getValueAt(row, column);
+
+        
     }
 }
