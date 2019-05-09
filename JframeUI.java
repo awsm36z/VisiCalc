@@ -38,8 +38,7 @@ public class JframeUI implements TableModelListener {
         f.setSize(500, 200);
         // Frame Visible = true
         f.setVisible(true);
-
-        f.getModel().addTableModelListener(this);
+        
 
     }
 

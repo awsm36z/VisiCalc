@@ -339,6 +339,7 @@ public class VisiCalc {
 	private static void printGrid(String command, Cell[][] cellSheet) {
 		Grid spreadsheet = new Grid(cellSheet);
 		cmd = saveCommand(command, cmd);
+		cmd+="\n";
 		spreadsheet.print(cellSheet);
 
 	}
