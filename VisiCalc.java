@@ -52,8 +52,8 @@ public class VisiCalc {
 
 		//
 		boolean quit = false;
-
-		JframeUI jfram = new JframeUI(cellSheet);
+System.out.println("hello world")
+		//JframeUI jfram = new JframeUI(cellSheet);
 		// input loop
 		while (!quit) {
 			System.out.println("ENTER:");
