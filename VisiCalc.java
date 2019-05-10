@@ -347,6 +347,7 @@ public class VisiCalc {
 
 			command = sc.next();
 			cmd = saveCommand(command, cmd);
+			cmd += "\n";
 			clearCell(command, cellSheet);
 	}
 

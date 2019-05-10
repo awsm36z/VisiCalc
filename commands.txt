@@ -31,4 +31,4 @@ SORTA A1 - A3
 SORTD B2 - B4
 SORTA C8 - C10
 print
-quit
+load ExtraCredit.txt
