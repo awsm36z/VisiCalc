@@ -47,7 +47,13 @@ public class DateCell extends Cell implements Comparable <Cell> {
 	}
 	
 	public String toString() {
-		return this.month + "/"+ this.day + "/" + this.year;
+		String date = this.month + "/"+ this.day + "/" + this.year;
+		
+		if (date.length()>9){
+			return date.substring(0, 9);
+		}
+		return date;
+		
 	}
 	
 	public String getValue() {

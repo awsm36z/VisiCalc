@@ -45,7 +45,7 @@ public class FormulaCell extends Cell implements Comparable<Cell> {
     }
 
     public String getValue(Cell[][] cellSheet) {
-        double answer = solve(cellSheet);
+        double answer = solve(cellSheet, this.formula);
         if (INVALID_VALUE == answer) {
             return ("NaN");
         }
@@ -93,14 +93,14 @@ public class FormulaCell extends Cell implements Comparable<Cell> {
         return 1;
     }
 
-    public double solve(Cell[][] cellSheet) {
+    public double solve(Cell[][] cellSheet, String formula) {
         /*
          * We will create an arraylist that will contain all tokens. The arraylist will
          * help us then easily breakdown our formula and allow us to traverse the
          * tokens.
          */
 
-        Scanner equationScanner = new Scanner(this.formula);
+        Scanner equationScanner = new Scanner(formula);
         double answer = 0.0;
 
         ArrayList<String> newFormula = new ArrayList<String>();
@@ -156,23 +156,39 @@ public class FormulaCell extends Cell implements Comparable<Cell> {
                 }
             }
 
-            double result = (sum/count);
-            return result;
+           
+            return (sum/count);
         }
-
-
-        int operatorIndex = -1;
 
         answer = solveWithOrderofOps(cellSheet, answer, newFormula);
         return answer;
     }
 
     private double solveWithOrderofOps(Cell[][] cellSheet, double answer, ArrayList<String> newFormula) {
-        int operatorIndex;
-        while (((operatorIndex = getParenthasiesIndex(newFormula)) != -1) && answer != INVALID_VALUE) {
-            operatorIndex += 2;
-            answer = evaluatAndSimplify(cellSheet, operatorIndex, newFormula);
+
+        while(newFormula.contains("(")){
+            int beginningIndex = newFormula.lastIndexOf("(");
+            int endIndex = newFormula.indexOf(")");
+            ArrayList<String> temp = new ArrayList<String>();
+
+            
+            for (int i = beginningIndex +1; i < endIndex; i++){
+                temp.add((newFormula.get(i) +""));
+            }
+            double tempAnswer = solveWithOrderofOps(cellSheet, answer, temp);
+            
+            int i;
+            for ( i = 0; i<= endIndex - beginningIndex; i++){
+                newFormula.remove(beginningIndex);
+            }
+
+            newFormula.add(beginningIndex, tempAnswer + "");
+
+            answer = solveWithOrderofOps(cellSheet, answer, newFormula);
+
         }
+
+        int operatorIndex;
 
         while (((operatorIndex = getExponentsIndex(newFormula)) != -1) && answer != INVALID_VALUE) {
             answer = evaluatAndSimplify(cellSheet, operatorIndex, newFormula);
@@ -294,7 +310,7 @@ public class FormulaCell extends Cell implements Comparable<Cell> {
 
         //Modulus
         else if (operator.equals("%")){
-            answer = firstTerm%secondTerm;
+            answer = firstTerm % secondTerm;
         }
 
         //Exponents
@@ -420,6 +436,9 @@ public class FormulaCell extends Cell implements Comparable<Cell> {
             if (newFormula.indexOf("*") == -1) {
                 return newFormula.indexOf("%");
             }
+            if (newFormula.indexOf("%") == -1){
+                return newFormula.indexOf("*");
+            }
             return Math.min(newFormula.indexOf("%"), newFormula.indexOf("*"));
         } 
         else if (newFormula.indexOf("*") == -1) {
@@ -428,7 +447,7 @@ public class FormulaCell extends Cell implements Comparable<Cell> {
             }
             return Math.min(newFormula.indexOf("%"), newFormula.indexOf("/"));        }
 
-        return Math.min(Math.min(newFormula.indexOf("/"), newFormula.indexOf("*")), newFormula.indexOf("%"));
+        return Math.min(Math.min(newFormula.indexOf("/"), newFormula.indexOf("*")) , newFormula.indexOf("%"));
     }
 
     private int getParenthasiesIndex(ArrayList<String> newFormula) {

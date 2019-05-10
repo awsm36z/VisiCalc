@@ -6,6 +6,7 @@ VisiCalc Project
 */
 public class Grid {
 	Cell[][] spreadsheet;
+	int width = 9;
 
 	public Grid(Cell[][] spreadsheet) {
 		this.spreadsheet = spreadsheet;
@@ -85,7 +86,7 @@ public class Grid {
 			// When the value is larger than the max size
 			// we will shrink it and display a smaller version.
 
-			content = content.substring(0, 9);
+			content = content.substring(0, width);
 			printSpaces(content);
 			System.out.print(content);
 			printSpaces(content);
@@ -108,7 +109,7 @@ public class Grid {
 			// When the value is larger than the max size
 			// we will shrink it and display a smaller version.
 
-			content = content.substring(0, 9);
+			content = content.substring(0, width);
 			printSpaces(content);
 			System.out.print(content);
 			printSpaces(content);
@@ -142,7 +143,7 @@ public class Grid {
 	 * @param content
 	 */
 	private void printSpaces(String content) {
-		for (int spaces = 0; spaces < (9 - content.length()) / 2; spaces++) {
+		for (int spaces = 0; spaces < (width - content.length()) / 2; spaces++) {
 			System.out.print(" ");
 		}
 	}
