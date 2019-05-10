@@ -18,7 +18,7 @@ VisiCalc Project
  * 8. Jframe 						   |+10
  * 9. Parenthasies                     |+5
  * 10. Basic Error Checking            |+1
- * 11.Instant Reload 
+ * 11.Instant Reload        
  * -------------------------------------------------
  * Total:------------------------------|+34
  */
@@ -35,8 +35,6 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-
-import javafx.scene.control.TextField;
 
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
@@ -61,7 +59,7 @@ public class VisiCalc {
 	// Constructor
 	VisiCalc(Cell[][] cellsheet) {
 
-		this.cellSheet = cellsheet;
+		cellSheet = cellsheet;
 		// Frame initiallization
 		f = new JFrame();
 
@@ -103,16 +101,15 @@ public class VisiCalc {
 		tf.setBounds(305, 230, 200, 40);
 
 		quitButton = new JButton("Quit!");
-		quitButton.setBounds(100,100,140,40);
+		quitButton.setBounds(100, 100, 140, 40);
 		quitButton.setLocation(640, 300);
-		quitButton.addActionListener( new ActionListener(){
-		
+		quitButton.addActionListener(new ActionListener() {
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				f.dispatchEvent(new WindowEvent(f, WindowEvent.WINDOW_CLOSING));
 				System.exit(0);
 			}
-			
 
 		});
 
@@ -120,6 +117,7 @@ public class VisiCalc {
 		button.setBounds(100, 100, 140, 40);
 		button.setLocation(330, 300);
 
+		// Method for action on button.
 		button.addActionListener(new ActionListener() {
 
 			@Override
@@ -139,8 +137,6 @@ public class VisiCalc {
 				j.repaint();
 			}
 		});
-
-		
 
 		quitButton.setVisible(true);
 		tf.setVisible(true);
@@ -222,7 +218,7 @@ public class VisiCalc {
 	 * @throws FileNotFoundException
 	 */
 	private boolean processCommand(String command, Scanner sc, Cell[][] cellSheet) throws FileNotFoundException {
-		
+
 		if (isQuit(command)) {
 			return quit();
 		}
@@ -303,7 +299,8 @@ public class VisiCalc {
 		}
 
 		else {
-			System.out.println("invalid input, pleas try again, or type \"help\" to see the possiblilities.    " + command);
+			System.out.println(
+					"invalid input, pleas try again, or type \"help\" to see the possiblilities.    " + command);
 		}
 		return false;
 	}
@@ -347,26 +344,26 @@ public class VisiCalc {
 
 	private void clearCellOrGrid(String command, Scanner sc, Cell[][] cellSheet) {
 		cmd = saveCommand(command, cmd);
-		command = sc.next();
-		cmd = saveCommand(command, cmd);
 
-		if (sc.hasNext()) {
+			command = sc.next();
+			cmd = saveCommand(command, cmd);
 			clearCell(command, cellSheet);
-		} else {
-			clearGrid(command);
-		}
 	}
 
 	private void clearCell(String command, Cell[][] cellSheet) {
-		int x = findX(command);
-		int y = findY(command);
-		cellSheet[y][x] = new Cell(x, y);
+		if (command.equalsIgnoreCase(".")) {
+			clearGrid();
+		} 
+		else {
+
+			int x = findX(command);
+			int y = findY(command);
+			cellSheet[y][x] = new Cell(x, y);
+
+		}
 	}
 
-	private void clearGrid(String command) {
-		Cell[][] cellSheet;
-		cmd = saveCommand(command, cmd);
-		cellSheet = new Cell[10][7];
+	private void clearGrid() {
 		for (int i = 0; i < cellSheet.length; i++) {
 			for (int j = 0; j < cellSheet[i].length; j++) {
 				cellSheet[i][j] = new Cell(i, j);
@@ -392,6 +389,7 @@ public class VisiCalc {
 		while (rangeReader.hasNext()) {
 			newFormula.add(rangeReader.next());
 		}
+		rangeReader.close();
 
 		String rangeStart = newFormula.get(0);
 		String rangeEnd = newFormula.get(2);

@@ -52,6 +52,9 @@ public class DateCell extends Cell implements Comparable <Cell> {
 		if (date.length()>9){
 			return date.substring(0, 9);
 		}
+		if(date.length() == 8) {
+			return date+" ";
+		}
 		return date;
 		
 	}
