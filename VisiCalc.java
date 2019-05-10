@@ -15,10 +15,10 @@ VisiCalc Project
  * 5. Rectangular Average			   |+2
  * 6. Rectangular Sort				   |+3
  * 7. Sort mixed types.				   |+2
- * 8.Jframe 						   |+10
+ * 8. Jframe 						   |+10
  * 9. Parenthasies                     |+5
  * 10. Basic Error Checking            |+1
- * 11. 
+ * 11.Instant Reload 
  * -------------------------------------------------
  * Total:------------------------------|+34
  */
