@@ -1,4 +1,3 @@
-
 /*
 Yassine El Yacoubi
 P.1
@@ -9,12 +8,7 @@ VisiCalc Project
 import java.util.*;
 
 public class FormulaCell extends Cell implements Comparable<Cell> {
-    /**
-     *
-     */
-
-    private static final double INVALID_VALUE = (double) Integer.MAX_VALUE;
-   
+    private static final double INVALID_VALUE = Double.MAX_VALUE;
     private String formula;
 
     public FormulaCell(String formula, int row, int column) {
@@ -22,24 +16,15 @@ public class FormulaCell extends Cell implements Comparable<Cell> {
         this.formula = formula;
     }
 
-    // ---------- to String method, returns the value long enough for the
-    // Grid.-----------
+    @Override
     public String toString() {
-        // For the grid toString we will only display the formula.
         if (this.formula.length() > 8) {
             return this.formula.substring(0, 9);
-        }
-        if (this.formula.length() == 5) {
-            return this.formula + "  ";
-        }
-        if (this.formula.length() == 8) {
-            return this.formula + "   ";
         }
         return this.formula + " ";
     }
 
-    // -----------------Get Value Method, returns literal value of the
-    // cell.--------------
+    @Override
     public String getValue() {
         return this.formula;
     }
@@ -47,205 +32,131 @@ public class FormulaCell extends Cell implements Comparable<Cell> {
     public String getValue(Cell[][] cellSheet) {
         double answer = solve(cellSheet, this.formula);
         if (INVALID_VALUE == answer) {
-            return ("NaN");
+            return "NaN";
         }
-        
-		String strNum = answer + "";
-		if (strNum.length()==2){
-			return strNum + "  ";
-		}
-		if(strNum.length() == 3){
-			return strNum + "  ";
-		}
-		if (strNum.length() == 4){
-			return strNum + " ";
-		}
-		if (strNum.length() == 5){
-			return strNum + "  ";
-		}
-		if (strNum.length() == 6){
-			return strNum + " ";
-		}
-		if (strNum.length() == 7){
-			return strNum + "  ";
-		}
-		return strNum + " ";
-        
+        return formatAnswer(answer);
     }
 
-    public int compareTo(Cell other) {
-            // fix this to actually return comparable.
-        //double thisValue = Double.parseDouble(this.getValue(cellsheet));
-        //double otherValue = Double.parseDouble(other.getValue(cellsheet));
+    private String formatAnswer(double answer) {
+        String strNum = String.valueOf(answer);
+        switch (strNum.length()) {
+            case 2:
+            case 3:
+            case 5:
+            case 7:
+                return strNum + "  ";
+            case 4:
+            case 6:
+                return strNum + " ";
+            default:
+                return strNum + " ";
+        }
+    }
 
-        if(other instanceof TextCell){
+    @Override
+    public int compareTo(Cell other) {
+        if (other instanceof TextCell || other instanceof NumberCell || other instanceof DateCell) {
             return -1;
         }
-        if(other instanceof NumberCell){
-            return -1;
-        }
-        if (other instanceof DateCell){
-            return -1;
-        }
-        if (other instanceof FormulaCell){
+        if (other instanceof FormulaCell) {
             return 0;
         }
         return 1;
     }
 
     public double solve(Cell[][] cellSheet, String formula) {
-        /*
-         * We will create an arraylist that will contain all tokens. The arraylist will
-         * help us then easily breakdown our formula and allow us to traverse the
-         * tokens.
-         */
-
         Scanner equationScanner = new Scanner(formula);
-        double answer = 0.0;
+        ArrayList<String> newFormula = new ArrayList<>();
 
-        ArrayList<String> newFormula = new ArrayList<String>();
-
-        // populate arraylist with the different tokens to calculate
         while (equationScanner.hasNext()) {
             newFormula.add(equationScanner.next());
         }
         equationScanner.close();
-        //if it is only assigning a cell to another cell.
+
         if (newFormula.size() == 1) {
             return resolveToNumber(newFormula.get(0), cellSheet);
         }
 
-        // if the input is looking for the
-        // sum of a range of values.
         if (isSum(newFormula)) {
-            double sum = 0.0;
-            sum = getSum(cellSheet, newFormula, sum);
-
-            return sum;
+            return getSum(cellSheet, newFormula);
         }
-        // end of isSum method.
 
-        // method to find the average
-        // of a range of values
         if (isAvg(newFormula)) {
-            double sum = 0.0;
-            int count = 0;
-
-            String rangeStart = newFormula.get(1);
-            String rangeEnd = newFormula.get(3);
-
-            int xStart = getXPosition(rangeStart);
-            int yStart = getYPosition(rangeStart);
-
-            int xEnd = getXPosition(rangeEnd);
-            int yEnd = getYPosition(rangeEnd);
-
-
-            for (int y = yStart; y < yEnd + 1; y++) {
-                for (int x = xStart; x < xEnd + 1; x++) {
-                    if (cellSheet[y][x] instanceof NumberCell){
-                        count++;
-                        value = cellSheet[y][x].getValue();
-                        sum += Double.parseDouble(value);
-                    }
-                    if (cellSheet[y][x] instanceof FormulaCell){
-                        count++;
-                        value = ((FormulaCell)cellSheet[y][x]).getValue(cellSheet);
-                        sum += Double.parseDouble(value);
-                    }
-                }
-            }
-
-           
-            return (sum/count);
+            return getAvg(cellSheet, newFormula);
         }
 
-        answer = solveWithOrderofOps(cellSheet, answer, newFormula);
-        return answer;
+        return solveWithOrderOfOps(cellSheet, newFormula);
     }
 
-    private double solveWithOrderofOps(Cell[][] cellSheet, double answer, ArrayList<String> newFormula) {
-
-        while(newFormula.contains("(")){
+    private double solveWithOrderOfOps(Cell[][] cellSheet, ArrayList<String> newFormula) {
+        while (newFormula.contains("(")) {
             int beginningIndex = newFormula.lastIndexOf("(");
             int endIndex = newFormula.indexOf(")");
-            ArrayList<String> temp = new ArrayList<String>();
+            ArrayList<String> temp = new ArrayList<>(newFormula.subList(beginningIndex + 1, endIndex));
+            double tempAnswer = solveWithOrderOfOps(cellSheet, temp);
 
-            
-            for (int i = beginningIndex +1; i < endIndex; i++){
-                temp.add((newFormula.get(i) +""));
-            }
-            double tempAnswer = solveWithOrderofOps(cellSheet, answer, temp);
-            
-            int i;
-            for ( i = 0; i<= endIndex - beginningIndex; i++){
+            for (int i = 0; i <= endIndex - beginningIndex; i++) {
                 newFormula.remove(beginningIndex);
             }
-
-            newFormula.add(beginningIndex, tempAnswer + "");
-
-            answer = solveWithOrderofOps(cellSheet, answer, newFormula);
-
+            newFormula.add(beginningIndex, String.valueOf(tempAnswer));
         }
 
         int operatorIndex;
-
-        while (((operatorIndex = getExponentsIndex(newFormula)) != -1) && answer != INVALID_VALUE) {
-            answer = evaluatAndSimplify(cellSheet, operatorIndex, newFormula);
+        while ((operatorIndex = getExponentsIndex(newFormula)) != -1) {
+            evaluateAndSimplify(cellSheet, operatorIndex, newFormula);
         }
 
-        // calculate all higher order operations (/ or *) first
-        while (((operatorIndex = getFirstMultiplicationOrDivisionIndex(newFormula)) != -1) && answer != INVALID_VALUE) {
-            answer = evaluatAndSimplify(cellSheet, operatorIndex, newFormula);
+        while ((operatorIndex = getFirstMultiplicationOrDivisionIndex(newFormula)) != -1) {
+            evaluateAndSimplify(cellSheet, operatorIndex, newFormula);
         }
 
-        // calculate lower order operations (+ or -) next
-        while (((operatorIndex = getFirstAdditionOrSubtractionIndex(newFormula)) != -1) && answer != INVALID_VALUE) {
-            answer = evaluatAndSimplify(cellSheet, operatorIndex, newFormula);
+        while ((operatorIndex = getFirstAdditionOrSubtractionIndex(newFormula)) != -1) {
+            evaluateAndSimplify(cellSheet, operatorIndex, newFormula);
         }
-        return answer;
+
+        return Double.parseDouble(newFormula.get(0));
     }
 
-    private double getSum(Cell[][] cellSheet, ArrayList<String> newFormula, double sum) {
+    private double getSum(Cell[][] cellSheet, ArrayList<String> newFormula) {
         String rangeStart = newFormula.get(1);
         String rangeEnd = newFormula.get(3);
         int xStart = getXPosition(rangeStart);
         int yStart = getYPosition(rangeStart);
-
         int xEnd = getXPosition(rangeEnd);
         int yEnd = getYPosition(rangeEnd);
 
-        for (int y = yStart; y < yEnd + 1; y++) {
-            for (int x = xStart; x < xEnd + 1; x++) {
-
-                if (cellSheet[y][x] instanceof NumberCell){
-                    value = cellSheet[y][x].getValue();
-                    sum += Double.parseDouble(value);
-                }
-                //if statement to check and return the value for formula methods.
-                if (cellSheet[y][x] instanceof FormulaCell){
-                    value = ((FormulaCell)cellSheet[y][x]).getValue(cellSheet);
-                    sum += Double.parseDouble(value);
-                }
+        double sum = 0.0;
+        for (int y = yStart; y <= yEnd; y++) {
+            for (int x = xStart; x <= xEnd; x++) {
+                sum += resolveToNumber(cellSheet[y][x].getValue(), cellSheet);
             }
         }
         return sum;
     }
 
-    private boolean isAvg(ArrayList<String> newFormula) {
-        return newFormula.get(0).equalsIgnoreCase("AVG");
+    private double getAvg(Cell[][] cellSheet, ArrayList<String> newFormula) {
+        String rangeStart = newFormula.get(1);
+        String rangeEnd = newFormula.get(3);
+        int xStart = getXPosition(rangeStart);
+        int yStart = getYPosition(rangeStart);
+        int xEnd = getXPosition(rangeEnd);
+        int yEnd = getYPosition(rangeEnd);
+
+        double sum = 0.0;
+        int count = 0;
+        for (int y = yStart; y <= yEnd; y++) {
+            for (int x = xStart; x <= xEnd; x++) {
+                sum += resolveToNumber(cellSheet[y][x].getValue(), cellSheet);
+                count++;
+            }
+        }
+        return sum / count;
     }
 
-    // ---------------------METHOD TO TAKE IN THE FORMULA AND SOLVE IT----------------------
-
-    private double evaluatAndSimplify(Cell[][] cellSheet, int operatorIndex, ArrayList<String> newFormula) {
-
-        // Now we will check to see if the tokens before and after
-        // are numbers or a Cellsheet location.
+    private double evaluateAndSimplify(Cell[][] cellSheet, int operatorIndex, ArrayList<String> newFormula) {
         String firstToken = newFormula.get(operatorIndex - 1);
         String secondToken = newFormula.get(operatorIndex + 1);
 
-        // Create a first and second term to be able to add them
         double firstTerm = resolveToNumber(firstToken, cellSheet);
         double secondTerm = resolveToNumber(secondToken, cellSheet);
 
@@ -254,112 +165,41 @@ public class FormulaCell extends Cell implements Comparable<Cell> {
         }
 
         String operator = newFormula.get(operatorIndex);
-
-        // -----------Now we return the evaluated expression--------
         double answer = calculate(operator, firstTerm, secondTerm);
 
-        newFormula.set(newFormula.indexOf(operator), answer + "");
-        // We trim down the array starting from the right
-        // so that the left indicies remain valid.
+        newFormula.set(operatorIndex, String.valueOf(answer));
         newFormula.remove(operatorIndex + 1);
         newFormula.remove(operatorIndex - 1);
 
         return answer;
     }
-    /*
-     * -----------------------------------------------------------------------------
-     * -----------------------------------------------------------------------------
-     * ------------------------------------ASSISTING METHODS------------------------
-     * -----------------------------------------------------------------------------
-     * -----------------------------------------------------------------------------
-     * 
-     * Table of Contents:
-     * 
-     * 1.calculate 2.getXposition 3.getYPosition 4.resolveToNumber 5.isRow
-     * 6.isColumn 7.isSum 8.getFirstMultiplicationOrDivisionIndex
-     * 9.getFirstAdditionOrSubtractionIndex
-     * 
-     */
 
-    /*
-     * 1. method to finish calculation by preforming simple task of multiplying the
-     * first and second term together.
-     * 
-     * @param: String operator - the operator will tell us what operation to perform
-     * double firstTerm - the first number before the operator double secondTerm -
-     * the first number AFTER the operator
-     * 
-     * Used in method Evaluate and Simplify.
-     */
     private double calculate(String operator, double firstTerm, double secondTerm) {
-        double answer = 0.0;
-        // Division
-        if (operator.equals("/")) {
-            answer = firstTerm / secondTerm;
+        switch (operator) {
+            case "/":
+                return firstTerm / secondTerm;
+            case "*":
+                return firstTerm * secondTerm;
+            case "+":
+                return firstTerm + secondTerm;
+            case "%":
+                return firstTerm % secondTerm;
+            case "^":
+                return Math.pow(firstTerm, secondTerm);
+            default:
+                return firstTerm - secondTerm;
         }
-
-        // Multiplication
-        else if (operator.equals("*")) {
-            answer = firstTerm * secondTerm;
-        }
-
-        // Addition
-        else if (operator.equals("+")) {
-            answer = firstTerm + secondTerm;
-        }
-
-        //Modulus
-        else if (operator.equals("%")){
-            answer = firstTerm % secondTerm;
-        }
-
-        //Exponents
-        else if(operator.equals("^")){
-            answer = Math.pow(firstTerm, secondTerm);
-        }
-
-        // Subtraction
-        else {
-            answer = firstTerm - secondTerm;
-        }
-        return answer;
     }
 
-    /*
-     * 2. method takes token and returns the X coordinate of the letter part of the
-     * token. Because if uses indexOf, we will get the 0-based index which will help
-     * us because our cellsheet is also 0-based index, so (1,1) is actually (0,0).
-     * 
-     * @param token - String with coordinates, ex. "A4" return: int - the x position
-     * of the coordinate, ex. "0".
-     */
     private int getXPosition(String token) {
         return "ABCDEFG".indexOf(token.substring(0, 1).toUpperCase());
     }
 
-    /*
-     * 3. method takes token and returns the 0 coordinate of the letter part of the
-     * token. We will subtract 1 because the method gives us the number which is
-     * just parsed from the token, and we want to make the YPosition 0-indexed to
-     * fit our cellsheet scheme.
-     * 
-     * @param String token - String with coordinates, ex. "A4" return: int - the y
-     * position of the coordinate, ex. "4".
-     */
     private int getYPosition(String token) {
         return Integer.parseInt(token.substring(1)) - 1;
     }
 
-    /**
-     * 4. Method will recieve a string that was pre-checked to be a position for a
-     * cell. The method will then return the cell value. But if the cell is not a
-     * number cell, it will exit out of the method and tell the user that the input
-     * is invalid.
-     * 
-     * @param String token Cell[][] cellsheet return double
-     * 
-     */
-    public double resolveToNumber(String token, Cell[][] cellSheet) {
+    private double resolveToNumber(String token, Cell[][] cellSheet) {
         if ("ABCDEFG".contains(token.substring(0, 1))) {
             int xPos = getXPosition(token);
             int yPos = getYPosition(token);
@@ -368,111 +208,43 @@ public class FormulaCell extends Cell implements Comparable<Cell> {
             } else if (cellSheet[yPos][xPos] instanceof NumberCell) {
                 return cellSheet[yPos][xPos].toDouble();
             }
-
-            String value = cellSheet[yPos][xPos].getValue();
-            if (value.length() > 0) {
-                return Double.parseDouble(value);
-            }
-            return 0;
-
+            return Double.parseDouble(cellSheet[yPos][xPos].getValue());
         } else {
             return Double.parseDouble(token);
         }
     }
 
-    /**
-     * 5. Method will check to see if the two y coordinates are the same, ex. "A4 -
-     * C4"
-     * 
-     * @param yStart
-     * @param yEnd
-     * @return boolean
-     */
-    private boolean isColumn(int yStart, int yEnd) {
-        return yStart == yEnd;
-    }
-
-    /*
-     * 6. Method will check to see if the two x coordinates are the same, ex.
-     * "A1 - A9"
-     * 
-     * @param xStart
-     * 
-     * @param xEnd
-     * 
-     * @return
-     */
-    private boolean isRow(int xStart, int xEnd) {
-        return isColumn(xStart, xEnd);
-    }
-
-    /**
-     * 7. Method will check to see if the ArrayList starts with SUM (ignores case)
-     * 
-     * @param newFormula
-     * @return
-     */
     private boolean isSum(ArrayList<String> newFormula) {
-        return newFormula.get(0).equalsIgnoreCase("Sum");
+        return newFormula.get(0).equalsIgnoreCase("SUM");
     }
 
-    /*
-     * 8. Assertion: ArrayList will contain multiplication or division - the method
-     * is called after the check asserted previously passes.
-     * 
-     * The following method's goal is to achieve the index of the higher order
-     * opperation. To do so, we will check to see if newFormula contains a division
-     * sign, if no, then it returns the index of the the multiplication sign. If
-     * yes, it checks to see if the array contains the multiplication sign, if no,
-     * then it retruns the index of the division sign. Otherwise, it will return the
-     * smaller index of the two operators using Math.min
-     * 
-     * @param newFormula
-     * 
-     * @return
-     */
-    private int getFirstMultiplicationOrDivisionIndex(ArrayList<String> newFormula) {
-        if (newFormula.indexOf("/") == -1) {
-            if (newFormula.indexOf("*") == -1) {
-                return newFormula.indexOf("%");
-            }
-            if (newFormula.indexOf("%") == -1){
-                return newFormula.indexOf("*");
-            }
-            return Math.min(newFormula.indexOf("%"), newFormula.indexOf("*"));
-        } 
-        else if (newFormula.indexOf("*") == -1) {
-            if (newFormula.indexOf("/") == -1) {
-                return newFormula.indexOf("%");
-            }
-            return Math.min(newFormula.indexOf("%"), newFormula.indexOf("/"));        }
-
-        return Math.min(Math.min(newFormula.indexOf("/"), newFormula.indexOf("*")) , newFormula.indexOf("%"));
-    }
-
-    private int getParenthasiesIndex(ArrayList<String> newFormula) {
-        return newFormula.indexOf("(");
+    private boolean isAvg(ArrayList<String> newFormula) {
+        return newFormula.get(0).equalsIgnoreCase("AVG");
     }
 
     private int getExponentsIndex(ArrayList<String> newFormula) {
         return newFormula.indexOf("^");
     }
 
-    /*
-     * 9. Assertion: ArrayList will contain addition or subtraction - the method is
-     * called after the check asserted previously passes.
-     * 
-     * The following method's goal is to achieve the index of the lower order
-     * opperation. To do so, we will check to see if newFormula contains a
-     * subtraction sign, if no, then it returns the index of the the addition sign.
-     * If yes, it checks to see if the array contains the addition sign, if no, then
-     * it retruns the index of the subtraction sign. Otherwise, it will return the
-     * smaller index of the two operators using Math.min
-     * 
-     * @param newFormula
-     * 
-     * @return
-     */
+    private int getFirstMultiplicationOrDivisionIndex(ArrayList<String> newFormula) {
+        if (newFormula.indexOf("/") == -1) {
+            if (newFormula.indexOf("*") == -1) {
+                return newFormula.indexOf("%");
+            }
+            if (newFormula.indexOf("%") == -1) {
+                return newFormula.indexOf("*");
+            }
+            return Math.min(newFormula.indexOf("%"), newFormula.indexOf("*"));
+        } else if (newFormula.indexOf("*") == -1) {
+            if (newFormula.indexOf("/") == -1) {
+                return newFormula.indexOf("%");
+            }
+            return Math.min(newFormula.indexOf("%"), newFormula.indexOf("/"));
+        }
+
+        return Math.min(Math.min(newFormula.indexOf("/"), newFormula.indexOf("*")), newFormula.indexOf("%"));
+    }
+
     private int getFirstAdditionOrSubtractionIndex(ArrayList<String> newFormula) {
         if (newFormula.indexOf("-") == -1) {
             return newFormula.indexOf("+");

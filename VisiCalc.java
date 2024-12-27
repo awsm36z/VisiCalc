@@ -1,4 +1,3 @@
-
 /*
 Yassine El Yacoubi
 P.1
@@ -41,50 +40,49 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 
 public class VisiCalc {
-
 	// frame
-	JFrame f;
+	private JFrame frame;
 	// Table
-	JTable j;
+	private JTable table;
 	// load file textfield
-	JTextField tf;
+	private JTextField textField;
 	// load button
-	JButton button;
+	private JButton loadButton;
 	// Quit Button
-	JButton quitButton;
+	private JButton quitButton;
 
 	// Grid
-	static Cell[][] cellSheet;
+	private static Cell[][] cellSheet;
 
 	// Constructor
-	VisiCalc(Cell[][] cellsheet) {
-
+	public VisiCalc(Cell[][] cellsheet) {
 		cellSheet = cellsheet;
-		// Frame initiallization
-		f = new JFrame();
+		initializeFrame();
+		initializeTable(cellsheet);
+		initializeComponents();
+	}
 
-		// Frame Title
-		f.setTitle("VisiCalc");
+	private void initializeFrame() {
+		frame = new JFrame("VisiCalc");
+		frame.setSize(800, 400);
+		frame.setVisible(true);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}
 
-		// Data to be displayed in the JTable
-		Cell[][] data = cellsheet;
-
-		// Column Names
+	private void initializeTable(Cell[][] cellsheet) {
 		String[] columnNames = { "A", "B", "C", "D", "E", "F", "G" };
-
-		// Initializing the JTable
-		j = new JTable(data, columnNames) {
+		table = new JTable(cellsheet, columnNames) {
 			@Override
 			public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-				data[rowIndex][columnIndex] = CellParser.getCellContent(rowIndex, columnIndex, (String) aValue);
+				cellSheet[rowIndex][columnIndex] = CellParser.getCellContent(rowIndex, columnIndex, (String) aValue);
 			}
 
 			@Override
 			public String getValueAt(int row, int column) {
-				if (data[row][column] instanceof FormulaCell) {
-					return ((FormulaCell) data[row][column]).getValue(cellsheet);
+				if (cellSheet[row][column] instanceof FormulaCell) {
+					return ((FormulaCell) cellSheet[row][column]).getValue(cellSheet);
 				}
-				return data[row][column].toString();
+				return cellSheet[row][column].toString();
 			}
 
 			@Override
@@ -92,217 +90,121 @@ public class VisiCalc {
 				return false;
 			}
 		};
-		j.setBounds(30, 40, 200, 300);
-
-		// adding it to JScrollPane
-		JScrollPane sp = new JScrollPane(j);
-
-		tf = new JTextField("", 20);
-		tf.setBounds(305, 230, 200, 40);
-
-		quitButton = new JButton("Quit!");
-		quitButton.setBounds(100, 100, 140, 40);
-		quitButton.setLocation(640, 300);
-		quitButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				f.dispatchEvent(new WindowEvent(f, WindowEvent.WINDOW_CLOSING));
-				System.exit(0);
-			}
-
-		});
-
-		button = new JButton("Load!");
-		button.setBounds(100, 100, 140, 40);
-		button.setLocation(330, 300);
-
-		// Method for action on button.
-		button.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				String inputString = tf.getText();
-				Scanner sc = new Scanner(inputString);
-
-				try {
-					String command = sc.next();
-					processCommand(command, sc, cellsheet);
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					System.out.println("File Not Found");
-					tf.setText("File Not Found");
-				}
-				tf.setText("");
-				j.repaint();
-			}
-		});
-
-		quitButton.setVisible(true);
-		tf.setVisible(true);
-		button.setVisible(true);
-
-		f.add(quitButton);
-		f.add(tf);
-		f.add(button);
-		f.add(sp);
-		// Frame Size
-		f.setSize(800, 400);
-		// Frame Visible = true
-		f.setVisible(true);
-
+		table.setBounds(30, 40, 200, 300);
+		JScrollPane sp = new JScrollPane(table);
+		frame.add(sp);
 	}
 
-	static String cmd = "";
+	private void initializeComponents() {
+		textField = new JTextField("", 20);
+		textField.setBounds(305, 230, 200, 40);
+
+		quitButton = new JButton("Quit!");
+		quitButton.setBounds(640, 300, 140, 40);
+		quitButton.addActionListener(e -> {
+			frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+			System.exit(0);
+		});
+
+		loadButton = new JButton("Load!");
+		loadButton.setBounds(330, 300, 140, 40);
+		loadButton.addActionListener(e -> {
+			String inputString = textField.getText();
+			try (Scanner sc = new Scanner(inputString)) {
+				String command = sc.next();
+				processCommand(command, sc, cellSheet);
+			} catch (FileNotFoundException ex) {
+				System.out.println("File Not Found");
+				textField.setText("File Not Found");
+			}
+			textField.setText("");
+			table.repaint();
+		});
+
+		frame.add(quitButton);
+		frame.add(textField);
+		frame.add(loadButton);
+	}
 
 	public static void main(String[] args) throws FileNotFoundException {
-
 		Cell[][] cellSheet = new Cell[10][7];
-
 		VisiCalc visicalc = new VisiCalc(cellSheet);
-
 		visicalc.start();
 	}
 
 	private void start() throws FileNotFoundException {
-		Scanner scOne = new Scanner(System.in);
+		try (Scanner scOne = new Scanner(System.in)) {
+			initializeCellSheet();
+			Grid spreadsheet = new Grid(cellSheet);
+			spreadsheet.print(cellSheet);
 
-		// Populates the cellSheet with empty cells.
+			boolean quit = false;
+			while (!quit) {
+				System.out.println("ENTER:");
+				String input = scOne.nextLine();
+				try (Scanner sc = new Scanner(input)) {
+					String command = sc.next();
+					quit = processCommand(command, sc, cellSheet);
+				}
+			}
+		}
+		System.out.println("Thanks for using VisiCalc!\nMade by Yassine El Yacoubi\nP.1\nMulvayne");
+	}
+
+	private void initializeCellSheet() {
 		for (int i = 0; i < cellSheet.length; i++) {
 			for (int j = 0; j < cellSheet[i].length; j++) {
 				cellSheet[i][j] = new Cell(i, j);
 			}
 		}
-
-		// Creates grid and populates it with the already set cellSheet.
-		Grid spreadsheet = new Grid(cellSheet);
-		spreadsheet.print(cellSheet);
-
-		//
-		boolean quit = false;
-		// input loop
-		while (!quit) {
-			System.out.println("ENTER:");
-			String input = scOne.nextLine();
-			Scanner sc = new Scanner(input);
-
-			// The first token will either be the command or the cell number
-			// we will name the variable: command for simplicity, assuming cell numbers
-			// are an implicit command to move to that cell.
-			String command = sc.next();
-			quit = processCommand(command, sc, cellSheet);
-		}
-		System.out.println("Thanks for using VisiCalc!\nMade by Yassine El Yacoubi\nP.1\nMulvayne");
 	}
 
-	/**
-	 * the following method will take the input and evaulate if it is a quit, print,
-	 * call, or assignment command.
-	 * 
-	 * Print: prints grid
-	 * 
-	 * Quit: quit the program
-	 * 
-	 * Call: display value of the cell
-	 * 
-	 * Assignment: assign a cell a value.
-	 * 
-	 * SORTA and SORTD: sorts the arrays given upward or downward depending on
-	 * 
-	 * @param
-	 * @param cmd
-	 * @param sc
-	 * @param spreadsheet
-	 * @param command
-	 * @return boolean
-	 * @throws FileNotFoundException
-	 */
 	private boolean processCommand(String command, Scanner sc, Cell[][] cellSheet) throws FileNotFoundException {
-
 		if (isQuit(command)) {
-			return quit();
-		}
-
-		else if (isPrint(command)) {
+			return true;
+		} else if (isPrint(command)) {
 			printGrid(command, cellSheet);
-		}
-		// Load Function code
-		else if (isLoad(command)) {
-
-			// takes in file to read from user.
+		} else if (isLoad(command)) {
 			loadFileCommands(sc, cellSheet);
-
 		} else if (isClearMethod(command)) {
-
 			clearCellOrGrid(command, sc, cellSheet);
-
 		} else if (isACellCoordinate(command)) {
-
-			int x = findX(command);
-			int y = findY(command);
-			cmd = saveCommand(command, cmd);
-			cmd += " ";
-
-			// check if the user wants to simply see cell content or if attempting
-			// to create new cell and populate it.
-			if (sc.hasNext()) {
-				String nextToken = sc.next();
-				// after cell coordinates, the next token has to be an equal sign
-				// if not, then we will warn the user and request a new input.
-				if (inputNotContainEqual(nextToken)) {
-					System.out.println("invalid token. Expected = sign after cell number");
-					return false;
-				}
-
-				assignCellToGrid(sc, cellSheet, x, y, nextToken);
-			}
-
-			/*
-			 * Command to just call and find a cell
-			 */
-			else {
-
-				// Command will evaluate the formula everytime you call it.
-				if (isFormulaCell(cellSheet, x, y)) {
-
-					printFormulaCell(cellSheet, x, y);
-
-				}
-				// otherwise, just print the literal value.
-				else {
-
-					printOtherCells(cellSheet, x, y);
-
-				}
-			}
-		}
-
-		else if (isHelp(command)) {
-
+			handleCellCoordinate(command, sc, cellSheet);
+		} else if (isHelp(command)) {
 			printHelpText();
-		}
-
-		/*
-		 * save command: method will either create or load a file that is passed through
-		 * as a string. Then it will rewrite the file with the commands called in the
-		 * program.
-		 */
-		else if (isSave(command)) {
+		} else if (isSave(command)) {
 			saveFile(sc);
-		}
-
-		/*
-		 * this is the SORTA AND SORTD method.--------------------
-		 */
-		else if (isSort(command)) {
+		} else if (isSort(command)) {
 			sortGridRange(command, sc, cellSheet);
-		}
-
-		else {
-			System.out.println(
-					"invalid input, pleas try again, or type \"help\" to see the possiblilities.    " + command);
+		} else {
+			System.out.println("Invalid input, please try again, or type \"help\" to see the possibilities. " + command);
 		}
 		return false;
+	}
+
+	private void handleCellCoordinate(String command, Scanner sc, Cell[][] cellSheet) {
+		int x = findX(command);
+		int y = findY(command);
+		cmd = saveCommand(command, cmd) + " ";
+
+		if (sc.hasNext()) {
+			String nextToken = sc.next();
+			if (inputNotContainEqual(nextToken)) {
+				System.out.println("Invalid token. Expected = sign after cell number");
+				return;
+			}
+			assignCellToGrid(sc, cellSheet, x, y, nextToken);
+		} else {
+			printCellContent(cellSheet, x, y);
+		}
+	}
+
+	private void printCellContent(Cell[][] cellSheet, int x, int y) {
+		if (isFormulaCell(cellSheet, x, y)) {
+			printFormulaCell(cellSheet, x, y);
+		} else {
+			printOtherCells(cellSheet, x, y);
+		}
 	}
 
 	private void assignCellToGrid(Scanner sc, Cell[][] cellSheet, int x, int y, String nextToken) {
@@ -323,10 +225,6 @@ public class VisiCalc {
 
 	private void printOtherCells(Cell[][] cellSheet, int x, int y) {
 		System.out.println(cellSheet[y][x].getValue());
-	}
-
-	private boolean quit() {
-		return true;
 	}
 
 	private void loadFileCommands(Scanner sc, Cell[][] cellSheet) throws FileNotFoundException {
